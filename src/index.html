@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="./styles/index.css" rel="stylesheet">
+    <title>Rewiring America Incentives Calculator Demo</title>
+    <script type="module" src="./components/Map.tsx"></script>
+    <link rel="stylesheet" href="./styles/index.css">
 </head>
-
 <body>
-    <h1 class="text-3xl font-bold text-blue-600">
-        Tailwind CSS test
-    </h1>
+    <div class="flex flex-col items-center justify-center p-6">
+        <h1 class="text-3xl font-bold text-blue-600 mb-6">Initial Map</h1>
+        <div id="map-container" class="w-full h-[80vh] border border-gray-400 shadow-md"></div>
+    </div>
 </body>
 </html>
