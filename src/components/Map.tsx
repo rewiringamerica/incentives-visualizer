@@ -12,7 +12,7 @@ const Map: React.FC = () => {
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: "https://demotiles.maplibre.org/style.json", // Demo tiles, use MapTiler later
+      style: "https://api.maptiler.com/maps/basic/style.json?key=JugoGHsH91QwESlUUHRB", // Demo tiles, use MapTiler later
       center: [-98.5795, 39.8283], // USA-center
       zoom: 4,
     });
