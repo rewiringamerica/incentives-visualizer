@@ -18,12 +18,19 @@ Follow the instructions below to set up, install, and launch the application.
    cd incentives-visualizer
     ```
 
-2. Install dependencies:
+2. Set up the environment:
+   - Create a `.env` file in the root directory and add your API keys and other environment variables as needed. 
+
+   ```bash
+   MAPTILER_API_KEY=your_maptiler_api_key
+   ```
+
+3. Install dependencies:
     ```bash
     yarn install
     ```
 
-3. Start the development server:
+4. Start the development server:
     ```bash
     yarn start
     ```
