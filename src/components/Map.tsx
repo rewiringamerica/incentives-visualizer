@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import LegendControl from 'mapboxgl-legend';
 
 const Map: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
