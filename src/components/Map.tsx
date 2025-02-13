@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import LegendControl from 'mapboxgl-legend';
+import '../styles/index.css';
 
 const Map: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
@@ -17,11 +18,17 @@ const Map: React.FC = () => {
       zoom: 4,
     });
 
+    let hoveredStateId = null;
+    const tooltip = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+
     map.on('load', () => {
       // Source for state polygons, can be replaced with a different source.
       map.addSource('states', {
           'type': 'geojson',
-          'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'
+          'data': 'https://maplibre.org/maplibre-gl-js/docs/assets/us_states.geojson'
       });
 
       map.addLayer({
@@ -29,24 +36,52 @@ const Map: React.FC = () => {
           'type': 'fill',
           'source': 'states',
           'paint': {
-              'fill-color': 'rgba(249, 214, 91)',
-              'fill-outline-color': 'rgb(0, 0, 0)'
+              'fill-color': '#F9D65B',
+              'fill-outline-color': '#1E1E1E',
+              'fill-opacity': [
+                  'case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                  1,
+                  0.5
+              ]
           }
       });
 
-      map.on('click', 'states-layer', (e) => {
-          new maplibregl.Popup()
-              .setLngLat(e.lngLat)
-              .setHTML(e.features && e.features[0] ? e.features[0].properties.name : 'Could not load data')
-              .addTo(map);
-      });
-
-      // Adjust the cursor to a pointer when it is over the states layer.
+      // Mouse controls
       map.on('mouseenter', 'states-layer', () => {
           map.getCanvas().style.cursor = 'pointer';
       });
+
+      map.on('mousemove', 'states-layer', (e) => {
+        if (e.features && e.features.length > 0) {
+            if (hoveredStateId) {
+                map.setFeatureState(
+                  {source: 'states', id: hoveredStateId},
+                  {hover: false}
+                );
+                tooltip
+                    .setLngLat(e.lngLat)
+                    .setHTML(e.features[0].properties.STATE_NAME)
+                    .addTo(map);
+            }
+            hoveredStateId = e.features[0].id;
+            map.setFeatureState(
+                {source: 'states', id: hoveredStateId},
+                {hover: true}
+            );
+        }
+      });
+
       map.on('mouseleave', 'states-layer', () => {
           map.getCanvas().style.cursor = '';
+          if (hoveredStateId) {
+              map.setFeatureState(
+                  {source: 'states', id: hoveredStateId},
+                  {hover: false}
+              );
+              tooltip.remove();
+          }
+          hoveredStateId = null;
       });
     });
 
