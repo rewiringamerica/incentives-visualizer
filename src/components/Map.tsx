@@ -10,10 +10,10 @@ const Map: React.FC = () => {
 
   useEffect(() => {
     if (!mapContainer.current) return;
-
+    const API_KEY = process.env.MAPTILER_API_KEY
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: "https://demotiles.maplibre.org/style.json", // Demo tiles, use MapTiler later
+      style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${API_KEY}`, // Demo tiles, use MapTiler later
       center: [-98.5795, 39.8283], // USA-center
       zoom: 4,
     });
