@@ -25,27 +25,53 @@ const Map: React.FC = () => {
     });
 
     map.on('load', () => {
-      // Source for state polygons, can be replaced with a different source.
-      map.addSource('states', {
-          'type': 'geojson',
-          'data': 'https://maplibre.org/maplibre-gl-js/docs/assets/us_states.geojson'
+      map.addSource('statesData', {
+        type: 'vector',
+        url: `https://api.maptiler.com/tiles/countries/tiles.json?key=${API_KEY}`
       });
 
       map.addLayer({
-          'id': 'states-layer',
-          'type': 'fill',
-          'source': 'states',
-          'paint': {
-              'fill-color': '#F9D65B',
-              'fill-outline-color': '#1E1E1E',
-              'fill-opacity': [
-                  'case',
-                  ['boolean', ['feature-state', 'hover'], false],
-                  1,
-                  0.5
-              ]
-          }
+        id: 'states-layer',
+        type: 'fill',
+        source: 'statesData',
+        'source-layer': 'administrative',
+        filter: ['all', ['==', 'level', 1], ['==', 'iso_a2', 'US']],
+        paint: {
+          'fill-color': '#F9D65B',
+          'fill-outline-color': '#1E1E1E',
+          'fill-opacity': ['case',
+            ['boolean', ['feature-state', 'hover'], false], 1, 0.5]
+        }
       });
+
+      var statesInfo = {
+        "NJ": {"name":"New Jersey","population":8882190},
+      };
+
+      function setStates(e) {
+        var states = map.querySourceFeatures('statesData', {
+          sourceLayer: 'administrative',
+          filter: ['all', ['==', 'level', 1], ['==', 'iso_a2', 'US']],
+        });
+      
+        // Adds custom data to the geojson state data
+        states.forEach(function(row) {
+          const stateCode: string = row.properties.code;
+          const splitStateCode: string[] = stateCode.split('-');
+          const stateId: string = splitStateCode[1];
+
+          if(row.id && statesInfo[stateId]) {
+            map.setFeatureState({
+              source: 'statesData',
+              sourceLayer: 'administrative',
+              id: row.id
+            }, {
+              population: statesInfo[stateId].population
+            });
+          }
+        });
+      }
+
 
       // Mouse controls
       map.on('mouseenter', 'states-layer', () => {
@@ -56,17 +82,19 @@ const Map: React.FC = () => {
         if (e.features && e.features.length > 0) {
             if (hoveredStateId) {
                 map.setFeatureState(
-                  {source: 'states', id: hoveredStateId},
+                  {source: 'statesData', sourceLayer: 'administrative', 
+                    id: hoveredStateId},
                   {hover: false}
                 );
                 tooltip
                     .setLngLat(e.lngLat)
-                    .setHTML(e.features[0].properties.STATE_NAME)
+                    .setHTML(e.features[0].properties.name)
                     .addTo(map);
             }
             hoveredStateId = e.features[0].id;
             map.setFeatureState(
-                {source: 'states', id: hoveredStateId},
+                {source: 'statesData', sourceLayer: 'administrative',
+                  id: hoveredStateId},
                 {hover: true}
             );
         }
@@ -76,7 +104,8 @@ const Map: React.FC = () => {
           map.getCanvas().style.cursor = '';
           if (hoveredStateId) {
               map.setFeatureState(
-                  {source: 'states', id: hoveredStateId},
+                  {source: 'statesData', sourceLayer: 'administrative',
+                    id: hoveredStateId},
                   {hover: false}
               );
               tooltip.remove();
