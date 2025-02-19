@@ -28,36 +28,6 @@ function loadStates(map: maplibregl.Map) {
         }
     });
 
-    // Example custom data to be joined with geojson data
-    var statesInfo = {
-        "NJ": {"name":"New Jersey","population":8882190},
-    };
-
-    // Example of how to join custom data with geojson data
-    function setStates(e) {
-        var states = map.querySourceFeatures('statesData', {
-            sourceLayer: 'administrative',
-            filter: ['all', ['==', 'level', 1], ['==', 'iso_a2', 'US']],
-        });
-        
-        // Adds custom data to the geojson state data
-        states.forEach(function(row) {
-            const stateCode: string = row.properties.code;
-            const splitStateCode: string[] = stateCode.split('-');
-            const stateId: string = splitStateCode[1];
-
-            if(row.id && statesInfo[stateId]) {
-            map.setFeatureState({
-                source: 'statesData',
-                sourceLayer: 'administrative',
-                id: row.id
-            }, {
-                population: statesInfo[stateId].population
-            });
-            }
-        });
-    }
-
     // Mouse controls
     map.on('mouseenter', 'states-layer', () => {
         map.getCanvas().style.cursor = 'pointer';
