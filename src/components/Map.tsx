@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import LegendControl from "mapboxgl-legend";
+import LegendControl from 'mapboxgl-legend';
 import '../styles/index.css';
 import loadStates from "./States";
 
@@ -19,14 +19,18 @@ const Map: React.FC = () => {
       zoom: 4,
     });
 
+    // add legend
+    const legend = new LegendControl();
+    map.addControl(legend, 'bottom-right');
+
     return () => map.remove();
   }, []);
-
 
   return <div ref={mapContainer} className="w-full h-full" />;
 };
 
 const mapContainer = document.getElementById("map-container");
+
 if (mapContainer) {
   ReactDOM.createRoot(mapContainer).render(<Map />);
 }
