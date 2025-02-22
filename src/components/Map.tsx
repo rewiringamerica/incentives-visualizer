@@ -1,32 +1,53 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import LegendControl from 'mapboxgl-legend';
 import '../styles/index.css';
 import loadStates from "./States";
+import MapButtons from "./MapButtons";
 
 const Map: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const [mapStyle, setMapStyle] = useState<maplibregl.StyleSpecification | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current) return;
     const API_KEY = process.env.MAPTILER_API_KEY
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${API_KEY}`, // Demo tiles, use MapTiler later
+      style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${API_KEY}`, 
       center: [-98.5795, 39.8283], // USA-center
       zoom: 4,
+      maxBounds: [
+        [-130, 23], // Southwest corner, Mainland USA
+        [-65, 50]   // Northeast corner, Mainland USA
+      ],
     });
 
     map.on('load', () => {
       loadStates(map);
+      setMapStyle(map.getStyle());
     });
 
+    mapRef.current = map;
     return () => map.remove();
   }, []);
 
-  return <div ref={mapContainer} className="w-full h-full" />;
+  const setMapView = (center: [number, number], maxBounds: [[number, number], [number, number]]) => {
+    if (mapRef.current) {
+      mapRef.current.setMaxBounds(maxBounds);
+      mapRef.current.flyTo({ center, zoom: 4 });
+    }
+  };
+
+  return (
+    <div className="relative w-full h-full">
+      <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
+      {mapStyle && <MapButtons setMapView={setMapView} mapStyle={mapStyle} />}
+    </div>
+  );
 };
 
 const mapContainer = document.getElementById("map-container");
