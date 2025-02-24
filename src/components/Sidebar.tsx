@@ -16,7 +16,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ stateData, onChipSelectionChange }) => {
-  // Initialize chips with placeholder data.
   const [chips, setChips] = useState<ChipData[]>([
     { id: "chip1", label: "Incentive 1", selected: true },
     { id: "chip2", label: "Incentive 2", selected: true },
@@ -41,7 +40,6 @@ const Sidebar: React.FC<SidebarProps> = ({ stateData, onChipSelectionChange }) =
 
   return (
     <div className="w-2/5 h-full p-4 bg-gray-100 overflow-y-auto">
-      {/* Chips/tags section (centered horizontally) */}
       <div className="flex flex-wrap justify-center gap-2 mb-4">
         {chips.map((chip) => (
           <button

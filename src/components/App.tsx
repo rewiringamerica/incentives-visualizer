@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
 import ReactDOM from "react-dom/client";
-import Map from "./Map";
+import NavBar from "./Navbar";
 import Sidebar from "./Sidebar";
+import Map from "./Map";
 
 export interface StateData {
   name: string;
@@ -16,10 +17,13 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-full">
-      <Sidebar stateData={selectedState} />
-      <div className="w-full h-full">
-        <Map onStateSelect={handleStateSelect} />
+    <div>
+      <NavBar />
+      <div className="flex h-[calc(100vh-64px)]">
+        <Sidebar stateData={selectedState} />
+        <div className="w-full h-full">
+          <Map onStateSelect={handleStateSelect} />
+        </div>
       </div>
     </div>
   );
