@@ -1,16 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rewiring America Incentives Calculator Demo</title>
-    <script type="module" src="./components/Map.tsx"></script>
-    <link rel="stylesheet" href="./styles/index.css">
+    <script type="module" src="./components/App.tsx"></script>
+    <link rel="stylesheet" href="./styles/index.css" />
 </head>
-<body>
-    <div class="flex flex-col items-center justify-center p-6">
-        <h1 class="text-3xl font-bold text-blue-600 mb-6">Initial Map</h1>
-        <div id="map-container" class="w-full h-[80vh] border border-gray-400 shadow-md"></div>
-    </div>
+
+<body class="bg-[#fefae9]">
+    <nav class="bg-[#f3d76f] p-4 relative flex items-center">
+        <!-- Logo -->
+        <div class="flex-shrink-0">
+            <img src="assets/logo.png" alt="Logo" class="h-8" />
+        </div>
+        <!-- Search bar -->
+        <div class="absolute left-1/2 transform -translate-x-1/2" style="max-width: 400px; width: 100%;">
+            <input id="search-input" type="text" placeholder="Enter your state, county, or address"
+                class="w-full pl-4 pr-12 py-2 rounded-[5px] border border-gray-300 bg-white focus:outline-none" />
+            <button id="search-btn"
+                class="absolute right-1 top-1 h-[calc(100%-0.5rem)] w-8 flex items-center justify-center rounded-[5px] bg-gray-500 text-white focus:outline-none">
+                →
+            </button>
+        </div>
+        <!-- Dropdown on the right for language selection -->
+        <div class="absolute right-4 flex-shrink-0">
+            <select class="bg-[#eed87e] h-8 rounded focus:outline-none border-0">
+                <option value="EN" selected>EN</option>
+                <option value="ES">ES</option>
+            </select>
+        </div>
+    </nav>
+    <!-- Main container for the new app layout -->
+    <div id="root" class="h-[calc(100vh-64px)]"></div>
+    <!-- Inline script for dynamic button color -->
+    <script>
+        const input = document.getElementById('search-input');
+        const btn = document.getElementById('search-btn');
+        input.addEventListener('input', () => {
+            if (input.value.trim().length > 0) {
+                btn.classList.remove('bg-gray-500');
+                btn.classList.add('bg-[#3d0db4]', 'hover:bg-[#2a0a75]');
+            } else {
+                btn.classList.remove('bg-[#3d0db4]', 'hover:bg-[#2a0a75]');
+                btn.classList.add('bg-gray-500');
+            }
+        });
+    </script>
 </body>
+
 </html>
