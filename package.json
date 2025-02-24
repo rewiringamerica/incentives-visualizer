@@ -12,9 +12,12 @@
   },
   "keywords": [],
   "dependencies": {
+    "@maptiler/sdk": "^3.0.1",
     "@tailwindcss/postcss": "^4.0.3",
+    "@watergis/maplibre-gl-legend": "^2.0.5",
+    "@watergis/svelte-maplibre-legend": "^4.0.1",
     "mapboxgl-legend": "^1.15.0",
-    "maplibre-gl": "^5.1.0",
+    "maplibre-gl": "^5.1.1",
     "openapi-fetch": "^0.13.4",
     "openapi-react-query": "^0.3.0",
     "parcel": "^2.13.3",
