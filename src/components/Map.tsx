@@ -1,5 +1,4 @@
-import React, { useEffect, useRef } from "react";
-import ReactDOM from "react-dom/client";
+import React, { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import '../styles/index.css';
