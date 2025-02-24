@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import LegendControl from "mapboxgl-legend";
 import "../styles/index.css";
 import loadStates from "./States";
 import MapButtons from "./MapButtons";
 import { StateData } from "./States";
+import Legend from './Legend.tsx';
 
 interface MapProps {
   onStateSelect?: (data: StateData) => void;
@@ -54,6 +54,7 @@ const Map: React.FC<MapProps> = ({ onStateSelect }) => {
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       {mapStyle && <MapButtons setMapView={setMapView} mapStyle={mapStyle} />}
+      <Legend map={mapRef.current} />
     </div>
   );
 };
