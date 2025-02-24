@@ -1,15 +1,82 @@
-import React from "react";
+import { useEffect } from "react";
+import maplibregl from "maplibre-gl";
 
-const Legend: React.FC = () => {
-  return (
-    <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow-md text-sm">
-      <h3 className="font-bold mb-2">Legend</h3>
-      <div className="flex items-center">
-        <span className="w-4 h-4 bg-yellow-400 border border-black mr-2"></span>
-        <span>States</span>
+class CustomLegendControl {
+  _map: maplibregl.Map | null = null;
+  _container: HTMLDivElement | null = null;
+
+  onAdd(map: maplibregl.Map) {
+    this._map = map;
+    this._container = document.createElement("div");
+    this._container.className = "legend";
+    this._container.style.position = "absolute";
+    this._container.style.bottom = "10px";
+    this._container.style.right = "10px";
+    this._container.style.background = "white";
+    this._container.style.padding = "10px";
+    this._container.style.marginBottom = "35px";
+    this._container.style.borderRadius = "5px";
+    this._container.style.boxShadow = "0px 0px 5px rgba(0,0,0,0.2)";
+    this._container.innerHTML = "<strong>Legend</strong><br/>Loading...";
+
+    this.updateLegend();
+    return this._container;
+  }
+
+  onRemove() {
+    if (this._container?.parentNode) {
+      this._container.parentNode.removeChild(this._container);
+    }
+    this._map = null;
+  }
+
+  updateLegend() {
+    if (!this._map || !this._container) return;
+
+    // updates the legend with map style for state
+    const fillColor = this._map.getPaintProperty("states-layer", "fill-color");
+    const outlineColor = this._map.getPaintProperty("states-layer", "fill-outline-color");
+    const fillOpacity = this._map.getPaintProperty("states-layer", "fill-opacity");
+
+    if (!fillColor) return;
+
+    this._container.innerHTML = `
+      <strong>Legend</strong>
+      <div style="display: flex; align-items: center; margin-top: 5px;">
+        <span style="
+          width: 20px; height: 20px; 
+          background: ${Array.isArray(fillColor) ? fillColor.join(", ") : fillColor}; 
+          opacity: ${Array.isArray(fillOpacity) ? fillOpacity.join(", ") : fillOpacity};
+          border: 2px solid ${outlineColor || "black"}; 
+          margin-right: 5px; display: inline-block;">
+        </span>
+        <span>US States</span>
       </div>
-    </div>
-  );
+    `;
+  }
+}
+
+interface LegendProps {
+  map: maplibregl.Map | null;
+}
+
+const Legend: React.FC<LegendProps> = ({ map }) => {
+  useEffect(() => {
+    if (!map) return;
+
+    const legendControl = new CustomLegendControl();
+    map.addControl(legendControl as any, "bottom-right");
+
+    const update = () => legendControl.updateLegend();
+    map.on("styledata", update);
+
+    return () => {
+      map.off("styledata", update);
+      map.removeControl(legendControl as any);
+    };
+  }, [map]);
+
+  return null;
 };
 
 export default Legend;

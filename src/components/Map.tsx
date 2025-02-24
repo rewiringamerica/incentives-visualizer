@@ -54,7 +54,7 @@ const Map: React.FC<MapProps> = ({ onStateSelect }) => {
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       {mapStyle && <MapButtons setMapView={setMapView} mapStyle={mapStyle} />}
-      <Legend /> {/* Add the legend here */}
+      <Legend map={mapRef.current} />
     </div>
   );
 };
