@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "../styles/index.css";
-import loadStates from "./States";
+import { loadStates, resetStateSelection } from "./States";
 import MapButtons from "./MapButtons";
 import { StateData } from "./States";
 import Legend from './Legend.tsx';
@@ -47,6 +47,7 @@ const Map: React.FC<MapProps> = ({ onStateSelect }) => {
     if (mapRef.current) {
       mapRef.current.setMaxBounds(maxBounds);
       mapRef.current.flyTo({ center, zoom: 4 });
+      resetStateSelection();
     }
   };
 

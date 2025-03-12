@@ -5,6 +5,8 @@ export interface StateData {
   description: string;
 }
 
+let isStateSelected = false;
+
 function loadStates(
   map: maplibregl.Map,
   onStateSelect?: (data: StateData) => void
@@ -90,8 +92,42 @@ function loadStates(
         description: `Details about ${stateName}...`,
       };
       onStateSelect(stateData);
+      if (!isStateSelected) {
+        zoomToState(map, feature);
+        isStateSelected = true;
+      }
     }
   });
 }
 
-export default loadStates;
+// Zoom to the selected state, using the state border as the bounding box
+function zoomToState(map: maplibregl.Map, feature: maplibregl.MapGeoJSONFeature) {    
+  const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+
+  function processCoordinates (coords) {
+    if (Array.isArray(coords[0])) {
+      coords.map(c => processCoordinates(c));
+    } else {
+      bounds[0] = Math.min(bounds[0], coords[0]);
+      bounds[1] = Math.min(bounds[1], coords[1]);
+      bounds[2] = Math.max(bounds[2], coords[0]);
+      bounds[3] = Math.max(bounds[3], coords[1]);
+    }
+  };
+
+  if (feature.geometry && feature.geometry.coordinates) {
+    processCoordinates(feature.geometry.coordinates);
+  };
+
+  map.fitBounds(bounds, {
+    padding: 40,
+    maxZoom: 6,
+    duration: 1000
+  });
+}
+
+function resetStateSelection() {
+  isStateSelected = false;
+}
+
+export { loadStates, resetStateSelection };
