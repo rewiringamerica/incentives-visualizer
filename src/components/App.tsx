@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from "react";
-import ReactDOM from "react-dom/client";
-import NavBar from "./Navbar";
-import Sidebar from "./Sidebar";
-import Map from "./Map";
+import React, { useCallback, useState } from 'react';
+import ReactDOM from 'react-dom/client';
+import Map from './Map';
+import NavBar from './Navbar';
+import Sidebar from './Sidebar';
 
 export interface StateData {
   name: string;
@@ -29,7 +29,7 @@ const App: React.FC = () => {
   );
 };
 
-const root = document.getElementById("root");
+const root = document.getElementById('root');
 if (root) {
   ReactDOM.createRoot(root).render(<App />);
 }

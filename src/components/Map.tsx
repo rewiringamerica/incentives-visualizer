@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-import "../styles/index.css";
-import loadStates from "./States";
-import MapButtons from "./MapButtons";
-import { StateData } from "./States";
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import React, { useEffect, useRef, useState } from 'react';
+import '../styles/index.css';
 import Legend from './Legend.tsx';
+import MapButtons from './MapButtons';
+import loadStates, { StateData } from './States';
 
 interface MapProps {
   onStateSelect?: (data: StateData) => void;
@@ -14,8 +13,9 @@ interface MapProps {
 const Map: React.FC<MapProps> = ({ onStateSelect }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const [mapStyle, setMapStyle] = useState<maplibregl.StyleSpecification | null>(null);
-  
+  const [mapStyle, setMapStyle] =
+    useState<maplibregl.StyleSpecification | null>(null);
+
   useEffect(() => {
     if (!mapContainer.current) return;
     const API_KEY = process.env.MAPTILER_API_KEY;
@@ -26,11 +26,11 @@ const Map: React.FC<MapProps> = ({ onStateSelect }) => {
       zoom: 4,
       maxBounds: [
         [-130, 23], // Southwest corner, Mainland USA
-        [-65, 50],  // Northeast corner, Mainland USA
+        [-65, 50], // Northeast corner, Mainland USA
       ],
     });
 
-    map.on("load", () => {
+    map.on('load', () => {
       // Load states and pass the onStateSelect callback so a state click will notify the parent.
       loadStates(map, onStateSelect);
       setMapStyle(map.getStyle());
@@ -42,7 +42,7 @@ const Map: React.FC<MapProps> = ({ onStateSelect }) => {
 
   const setMapView = (
     center: [number, number],
-    maxBounds: [[number, number], [number, number]]
+    maxBounds: [[number, number], [number, number]],
   ) => {
     if (mapRef.current) {
       mapRef.current.setMaxBounds(maxBounds);
