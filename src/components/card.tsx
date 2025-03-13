@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, forwardRef } from 'react';
+import { PropsWithChildren, forwardRef } from 'react';
 
 import clsx from 'clsx';
 

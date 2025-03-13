@@ -1,12 +1,12 @@
-import createFetchClient from "openapi-fetch";
-import createClient from "openapi-react-query";
+import createFetchClient from 'openapi-fetch';
+import createClient from 'openapi-react-query';
 
-import type { paths } from "../types/api.gen";
+import type { paths } from '../types/api.gen';
 
 export function createApi(baseUrl: string) {
   const fetchClient = createFetchClient<paths>({
     baseUrl,
-    credentials: "include",
+    credentials: 'include',
   });
 
   return fetchClient;

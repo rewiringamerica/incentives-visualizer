@@ -1,17 +1,17 @@
 export enum PaymentMethod {
-  REBATE = "rebate",
-  TAX_CREDIT = "tax_credit",
-  POS_REBATE = "pos_rebate",
-  ASSISTANCE_PROGRAM = "assistance_program",
+  REBATE = 'rebate',
+  TAX_CREDIT = 'tax_credit',
+  POS_REBATE = 'pos_rebate',
+  ASSISTANCE_PROGRAM = 'assistance_program',
 }
 
 export enum OwnerStatus {
-  HOMEOWNER = "homeowner",
-  RENTER = "renter",
+  HOMEOWNER = 'homeowner',
+  RENTER = 'renter',
 }
 
-export type AmountType = "dollar_amount" | "percent" | "dollars_per_unit";
-export type Unit = "kilowatt" | "ton" | "square_foot" | "per_kwh";
+export type AmountType = 'dollar_amount' | 'percent' | 'dollars_per_unit';
+export type Unit = 'kilowatt' | 'ton' | 'square_foot' | 'per_kwh';
 
 export interface Amount {
   type: AmountType;
