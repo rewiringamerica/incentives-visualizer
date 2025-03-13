@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import placeholderIcon from "../assets/placeholder_icon.png";
+import { Incentive } from "../mocks/types";
+import { IncentiveCard } from "./incentive-card";
+import { mockIncentivesData } from "../mocks/data";
 
 export interface ChipData {
   id: string;
@@ -74,6 +77,20 @@ const Sidebar: React.FC<SidebarProps> = ({ stateData, onChipSelectionChange }) =
         <div>
           <h2 className="text-xl font-bold mb-2">{stateData.name}</h2>
           <p>{stateData.description}</p>
+          {/* Incentives List */}
+          <div className="mt-4 space-y-4">
+            {mockIncentivesData.incentives.map((incentive: Incentive) => (
+              <IncentiveCard
+                key={incentive.id}
+                typeChips={incentive.payment_methods}
+                headline={incentive.program}
+                subHeadline={incentive.eligible_geo_group || ""}
+                body={incentive.short_description.en}
+                warningChip={incentive.low_income ? "Low Income Eligible" : null}
+                buttonUrl={incentive.more_info_url?.en || null}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <p>Select a state on the map to view details.</p> 
