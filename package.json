@@ -2,7 +2,6 @@
   "name": "incentives-visualizer",
   "version": "1.0.0",
   "description": "Explore incentives coverage data",
-  "main": "index.js",
   "author": "",
   "license": "Apache-2.0",
   "scripts": {
