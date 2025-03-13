@@ -18,6 +18,14 @@ function loadStates(
     closeOnClick: false,
   });
 
+  const US_STATE_NAMES = [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
+    "Hawaii", "Hawai'i", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+    "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
+    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+  ];
+
   map.addSource("statesData", {
     type: 'vector',
     url: `https://api.maptiler.com/tiles/countries/tiles.json?key=${API_KEY}`,
@@ -42,6 +50,45 @@ function loadStates(
     },
   });
 
+  const labelLayout = {
+    "text-field": "{name}",
+    "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+    "text-size": 12,
+    "text-offset": [0, 0],
+    "symbol-placement": "point",
+  };
+
+  const labelPaint = {
+    "text-color": "#000000",
+  };
+
+  map.addLayer({
+    id: "state-labels-layer",
+    type: "symbol",
+    source: {
+      type: "vector",
+      url: `https://api.maptiler.com/tiles/v3-openmaptiles/tiles.json?key=${API_KEY}`
+    },
+    "source-layer": "place",
+    filter: ["all", ["in", "class", "state", "island"], ["in", "name", ...US_STATE_NAMES]],
+    layout: labelLayout,
+    paint: labelPaint
+  });
+
+  // Add layer for Hawaii label (doesn't show up in the state-labels-layer)
+  map.addLayer({
+    id: "hawaii-label",
+    type: "symbol",
+      source: {
+      type: "vector",
+      url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${API_KEY}`
+    },
+    "source-layer": "place",
+    filter: ["all", ["==", "class", "state"], ["==", "name", "Hawaii"]],
+    layout: labelLayout,
+    paint: labelPaint
+  });
+  
   // Change cursor on enter
   map.on("mouseenter", "states-layer", () => {
     map.getCanvas().style.cursor = "pointer";
@@ -96,6 +143,12 @@ function loadStates(
         zoomToState(map, feature);
         isStateSelected = true;
       }
+    }
+  });
+
+  map.on("click", "state-labels-layer", (e) => {
+    if (e.features && e.features.length > 0) {
+      const feature = e.features[0];
     }
   });
 }
