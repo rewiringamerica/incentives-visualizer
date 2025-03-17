@@ -1,9 +1,12 @@
 import maplibregl from 'maplibre-gl';
+import { US_STATE_NAMES } from '../data/states';
 
 export interface StateData {
   name: string;
   description: string;
 }
+
+let isStateSelected = false;
 
 function loadStates(
   map: maplibregl.Map,
@@ -38,6 +41,66 @@ function loadStates(
         0.5,
       ],
     },
+  });
+
+  const labelLayout = {
+    'text-field': '{name:en}',
+    'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+    'text-size': 12,
+    'text-offset': [0, 0],
+    'symbol-placement': 'point',
+  };
+
+  const labelPaint = {
+    'text-color': '#000000',
+  };
+
+  map.addLayer({
+    id: 'state-labels-layer',
+    type: 'symbol',
+    source: {
+      type: 'vector',
+      url: `https://api.maptiler.com/tiles/v3-openmaptiles/tiles.json?key=${API_KEY}`,
+    },
+    'source-layer': 'place',
+    filter: [
+      'all',
+      ['in', 'class', 'state', 'island'],
+      ['in', 'name:en', ...US_STATE_NAMES],
+    ],
+    layout: labelLayout,
+    paint: labelPaint,
+  });
+
+  // Used for Hawaii and DC
+  map.addSource('statesLabelData', {
+    type: 'vector',
+    url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${API_KEY}`,
+  });
+
+  // Add layer for Hawaii label (doesn't show up in the state-labels-layer)
+  map.addLayer({
+    id: 'hawaii-label',
+    type: 'symbol',
+    source: 'statesLabelData',
+    'source-layer': 'place',
+    filter: ['all', ['==', 'class', 'state'], ['==', 'name:en', 'Hawaii']],
+    layout: labelLayout,
+    paint: labelPaint,
+  });
+
+  map.addLayer({
+    id: 'dc-label',
+    type: 'symbol',
+    source: 'statesLabelData',
+    'source-layer': 'place',
+    filter: [
+      'all',
+      ['==', 'class', 'state'],
+      ['==', 'name:en', 'Washington, D.C.'],
+    ],
+    layout: labelLayout,
+    paint: labelPaint,
   });
 
   // Change cursor on enter
@@ -102,8 +165,45 @@ function loadStates(
         description: `Details about ${stateName}...`,
       };
       onStateSelect(stateData);
+      if (!isStateSelected) {
+        zoomToState(map, feature);
+        isStateSelected = true;
+      }
     }
   });
 }
 
-export default loadStates;
+// Zoom to the selected state, using the state border as the bounding box
+function zoomToState(
+  map: maplibregl.Map,
+  feature: maplibregl.MapGeoJSONFeature,
+) {
+  const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+
+  function processCoordinates(coords) {
+    if (Array.isArray(coords[0])) {
+      coords.map(c => processCoordinates(c));
+    } else {
+      bounds[0] = Math.min(bounds[0], coords[0]);
+      bounds[1] = Math.min(bounds[1], coords[1]);
+      bounds[2] = Math.max(bounds[2], coords[0]);
+      bounds[3] = Math.max(bounds[3], coords[1]);
+    }
+  }
+
+  if (feature.geometry && feature.geometry.coordinates) {
+    processCoordinates(feature.geometry.coordinates);
+  }
+
+  map.fitBounds(bounds, {
+    padding: 40,
+    maxZoom: 6,
+    duration: 1000,
+  });
+}
+
+function resetStateSelection() {
+  isStateSelected = false;
+}
+
+export { loadStates, resetStateSelection };

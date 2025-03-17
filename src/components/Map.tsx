@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import '../styles/index.css';
 import Legend from './Legend.tsx';
 import MapButtons from './MapButtons';
-import loadStates, { StateData } from './States';
+import { loadStates, resetStateSelection, StateData } from './States';
 
 interface MapProps {
   onStateSelect?: (data: StateData) => void;
@@ -15,13 +15,19 @@ const Map: React.FC<MapProps> = ({ onStateSelect }) => {
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [mapStyle, setMapStyle] =
     useState<maplibregl.StyleSpecification | null>(null);
+  const STYLE_VERSION = 8; // Required for declaring a style, may change in the future
 
   useEffect(() => {
     if (!mapContainer.current) return;
     const API_KEY = process.env.MAPTILER_API_KEY;
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${API_KEY}`,
+      style: {
+        version: STYLE_VERSION,
+        sources: {},
+        layers: [],
+        glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${API_KEY}`,
+      },
       center: [-98.5795, 39.8283], // USA-center
       zoom: 4,
       maxBounds: [
@@ -46,7 +52,8 @@ const Map: React.FC<MapProps> = ({ onStateSelect }) => {
   ) => {
     if (mapRef.current) {
       mapRef.current.setMaxBounds(maxBounds);
-      mapRef.current.flyTo({ center, zoom: 4 });
+      mapRef.current.flyTo({ center, zoom: 0 });
+      resetStateSelection();
     }
   };
 
