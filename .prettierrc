@@ -1,0 +1,10 @@
+{
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "avoid",
+  "printWidth": 80,
+  "plugins": [
+    "prettier-plugin-organize-imports",
+    "prettier-plugin-multiline-arrays"
+  ]
+}
