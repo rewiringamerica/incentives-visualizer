@@ -1,4 +1,5 @@
 import maplibregl from "maplibre-gl";
+import { US_STATE_NAMES } from "../data/states";
 
 export interface StateData {
   name: string;
@@ -18,16 +19,8 @@ function loadStates(
     closeOnClick: false,
   });
 
-  const US_STATE_NAMES = [
-    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
-    "Hawaii", "Hawai'i", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
-    "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
-    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
-    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
-  ];
-
   map.addSource("statesData", {
-    type: 'vector',
+    type: "vector",
     url: `https://api.maptiler.com/tiles/countries/tiles.json?key=${API_KEY}`,
   });
 
@@ -51,7 +44,7 @@ function loadStates(
   });
 
   const labelLayout = {
-    "text-field": "{name}",
+    "text-field": "{name:en}",
     "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
     "text-size": 12,
     "text-offset": [0, 0],
@@ -67,28 +60,49 @@ function loadStates(
     type: "symbol",
     source: {
       type: "vector",
-      url: `https://api.maptiler.com/tiles/v3-openmaptiles/tiles.json?key=${API_KEY}`
+      url: `https://api.maptiler.com/tiles/v3-openmaptiles/tiles.json?key=${API_KEY}`,
     },
     "source-layer": "place",
-    filter: ["all", ["in", "class", "state", "island"], ["in", "name", ...US_STATE_NAMES]],
+    filter: [
+      "all",
+      ["in", "class", "state", "island"],
+      ["in", "name:en", ...US_STATE_NAMES],
+    ],
     layout: labelLayout,
-    paint: labelPaint
+    paint: labelPaint,
+  });
+
+  // Used for Hawaii and DC
+  map.addSource("statesLabelData", {
+    type: "vector",
+    url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${API_KEY}`,
   });
 
   // Add layer for Hawaii label (doesn't show up in the state-labels-layer)
   map.addLayer({
     id: "hawaii-label",
     type: "symbol",
-      source: {
-      type: "vector",
-      url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${API_KEY}`
-    },
+    source: "statesLabelData",
     "source-layer": "place",
-    filter: ["all", ["==", "class", "state"], ["==", "name", "Hawaii"]],
+    filter: ["all", ["==", "class", "state"], ["==", "name:en", "Hawaii"]],
     layout: labelLayout,
-    paint: labelPaint
+    paint: labelPaint,
   });
-  
+
+  map.addLayer({
+    id: "dc-label",
+    type: "symbol",
+    source: "statesLabelData",
+    "source-layer": "place",
+    filter: [
+      "all",
+      ["==", "class", "state"],
+      ["==", "name:en", "Washington, D.C."],
+    ],
+    layout: labelLayout,
+    paint: labelPaint,
+  });
+
   // Change cursor on enter
   map.on("mouseenter", "states-layer", () => {
     map.getCanvas().style.cursor = "pointer";
@@ -100,13 +114,21 @@ function loadStates(
       // Reset previous hovered feature
       if (hoveredStateId !== null) {
         map.setFeatureState(
-          { source: "statesData", sourceLayer: "administrative", id: hoveredStateId },
+          {
+            source: "statesData",
+            sourceLayer: "administrative",
+            id: hoveredStateId,
+          },
           { hover: false }
         );
       }
       hoveredStateId = e.features[0].id;
       map.setFeatureState(
-        { source: "statesData", sourceLayer: "administrative", id: hoveredStateId },
+        {
+          source: "statesData",
+          sourceLayer: "administrative",
+          id: hoveredStateId,
+        },
         { hover: true }
       );
       tooltip
@@ -121,7 +143,11 @@ function loadStates(
     map.getCanvas().style.cursor = "";
     if (hoveredStateId !== null) {
       map.setFeatureState(
-        { source: "statesData", sourceLayer: "administrative", id: hoveredStateId },
+        {
+          source: "statesData",
+          sourceLayer: "administrative",
+          id: hoveredStateId,
+        },
         { hover: false }
       );
     }
@@ -145,37 +171,34 @@ function loadStates(
       }
     }
   });
-
-  map.on("click", "state-labels-layer", (e) => {
-    if (e.features && e.features.length > 0) {
-      const feature = e.features[0];
-    }
-  });
 }
 
 // Zoom to the selected state, using the state border as the bounding box
-function zoomToState(map: maplibregl.Map, feature: maplibregl.MapGeoJSONFeature) {    
+function zoomToState(
+  map: maplibregl.Map,
+  feature: maplibregl.MapGeoJSONFeature
+) {
   const bounds = [Infinity, Infinity, -Infinity, -Infinity];
 
-  function processCoordinates (coords) {
+  function processCoordinates(coords) {
     if (Array.isArray(coords[0])) {
-      coords.map(c => processCoordinates(c));
+      coords.map((c) => processCoordinates(c));
     } else {
       bounds[0] = Math.min(bounds[0], coords[0]);
       bounds[1] = Math.min(bounds[1], coords[1]);
       bounds[2] = Math.max(bounds[2], coords[0]);
       bounds[3] = Math.max(bounds[3], coords[1]);
     }
-  };
+  }
 
   if (feature.geometry && feature.geometry.coordinates) {
     processCoordinates(feature.geometry.coordinates);
-  };
+  }
 
   map.fitBounds(bounds, {
     padding: 40,
     maxZoom: 6,
-    duration: 1000
+    duration: 1000,
   });
 }
 
