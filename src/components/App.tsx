@@ -16,11 +16,15 @@ const App: React.FC = () => {
     setSelectedState(data);
   }, []);
 
+  const handleSidebarClose = useCallback(() => {
+    setSelectedState(null);
+  }, []);
+
   return (
     <div>
       <NavBar />
       <div className="flex h-[calc(100vh-64px)]">
-        <Sidebar stateData={selectedState} />
+        <Sidebar stateData={selectedState} onClose={handleSidebarClose} />
         <div className="w-full h-full">
           <Map onStateSelect={handleStateSelect} />
         </div>
