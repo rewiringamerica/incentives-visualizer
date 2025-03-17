@@ -1,13 +1,13 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Tooltip styling */
 .maplibregl-popup-content {
-    background-color: #FFFAE7;
-    color: black;
-    border-radius: 8px;
-    padding: 15px;
+  background-color: #fffae7;
+  color: black;
+  border-radius: 8px;
+  padding: 15px;
 }
 
 .maplibregl-popup-tip {
-    border-top-color: #FFFAE7 !important;
+  border-top-color: #fffae7 !important;
 }

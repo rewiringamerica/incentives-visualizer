@@ -1,8 +1,8 @@
+import Tooltip from '@mui/material/Tooltip';
 import clsx from 'clsx';
-import React, { FC, PropsWithChildren, useRef, useState, useEffect } from 'react';
+import { FC, PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { Card } from './card';
 import { ExclamationPoint, ExternalLink, UpRightArrow } from './icons';
-import Tooltip from '@mui/material/Tooltip';
 
 const Chip: FC<PropsWithChildren<{ isWarning?: boolean }>> = ({
   isWarning,
@@ -88,35 +88,43 @@ const BorderlessLinkButton: FC<PropsWithChildren<{ href: string }>> = ({
   </a>
 );
 
-const TruncatedTextWithTooltip: FC<{ text: string; className: string }> = ({ text, className }) => {
+const TruncatedTextWithTooltip: FC<{ text: string; className: string }> = ({
+  text,
+  className,
+}) => {
   const textRef = useRef<HTMLDivElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
 
   const checkTruncation = () => {
     if (textRef.current) {
-      setIsTruncated(textRef.current.scrollHeight > textRef.current.clientHeight || textRef.current.scrollWidth > textRef.current.clientWidth);
+      setIsTruncated(
+        textRef.current.scrollHeight > textRef.current.clientHeight ||
+          textRef.current.scrollWidth > textRef.current.clientWidth,
+      );
     }
   };
 
   useEffect(() => {
     checkTruncation();
-    window.addEventListener("resize", checkTruncation);
+    window.addEventListener('resize', checkTruncation);
 
     return () => {
-      window.removeEventListener("resize", checkTruncation);
+      window.removeEventListener('resize', checkTruncation);
     };
   }, []);
 
   return (
-    <Tooltip title={isTruncated ? text : ""} arrow>
-      <div ref={textRef} className={`${className} text-ellipsis overflow-hidden`} onMouseEnter={checkTruncation}>
+    <Tooltip title={isTruncated ? text : ''} arrow>
+      <div
+        ref={textRef}
+        className={`${className} text-ellipsis overflow-hidden`}
+        onMouseEnter={checkTruncation}
+      >
         {text}
       </div>
     </Tooltip>
   );
 };
-
-  
 
 export const IncentiveCard: FC<{
   typeChips: string[];
@@ -128,17 +136,26 @@ export const IncentiveCard: FC<{
 }> = ({ typeChips, headline, subHeadline, body, warningChip, buttonUrl }) => (
   <Card padding="small">
     <div className="flex gap-4 justify-between items-baseline">
-      <TruncatedTextWithTooltip text={headline} className="text-grey-900 text-lg font-medium leading-normal max-w-xs" />
+      <TruncatedTextWithTooltip
+        text={headline}
+        className="text-grey-900 text-lg font-medium leading-normal max-w-xs"
+      />
       {buttonUrl && (
         <BorderlessLinkButton href={buttonUrl}>
           <ExternalLink w={20} h={20} />
         </BorderlessLinkButton>
       )}
     </div>
-    
-    <TruncatedTextWithTooltip text={subHeadline} className="text-grey-400 text-base font-medium leading-tight max-w-xs" />
-    
-    <TruncatedTextWithTooltip text={body} className="text-grey-600 text-base leading-normal max-w-xs line-clamp-3" />
+
+    <TruncatedTextWithTooltip
+      text={subHeadline}
+      className="text-grey-400 text-base font-medium leading-tight max-w-xs"
+    />
+
+    <TruncatedTextWithTooltip
+      text={body}
+      className="text-grey-600 text-base leading-normal max-w-xs line-clamp-3"
+    />
 
     <div className="flex flex-wrap gap-2.5">
       {typeChips.map((chip, index) => (

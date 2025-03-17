@@ -1,17 +1,18 @@
-import React, { useState } from "react";
-import logo from "../assets/logo.png";
+import React, { useState } from 'react';
+import logo from '../assets/logo.png';
 
 const Navbar: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
   // Change button color to #3d0db4 when there's text and make it darker upon hover, else keep it gray
-  const buttonClass = searchTerm.trim().length > 0
-    ? "bg-[#3d0db4] hover:bg-[#270778]"
-    : "bg-gray-500 hover:bg-gray-500";
+  const buttonClass =
+    searchTerm.trim().length > 0
+      ? 'bg-[#3d0db4] hover:bg-[#270778]'
+      : 'bg-gray-500 hover:bg-gray-500';
 
   return (
     <nav className="bg-[#f3d76f] p-4 relative flex items-center">
@@ -22,7 +23,7 @@ const Navbar: React.FC = () => {
       {/* Search bar */}
       <div
         className="absolute left-1/2 transform -translate-x-1/2"
-        style={{ maxWidth: "400px", width: "100%" }}
+        style={{ maxWidth: '400px', width: '100%' }}
       >
         <input
           type="text"
