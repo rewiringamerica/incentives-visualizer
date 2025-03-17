@@ -1,13 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-import "../styles/index.css";
-import { loadStates, resetStateSelection } from "./States";
-import MapButtons from "./MapButtons";
-import { StateData } from "./States";
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import React, { useEffect, useRef, useState } from 'react';
+import '../styles/index.css';
 import Legend from './Legend.tsx';
 import MapButtons from './MapButtons';
-import loadStates, { StateData } from './States';
+import { loadStates, resetStateSelection, StateData } from './States';
 
 interface MapProps {
   onStateSelect?: (data: StateData) => void;
@@ -16,9 +13,10 @@ interface MapProps {
 const Map: React.FC<MapProps> = ({ onStateSelect }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const [mapStyle, setMapStyle] = useState<maplibregl.StyleSpecification | null>(null);
+  const [mapStyle, setMapStyle] =
+    useState<maplibregl.StyleSpecification | null>(null);
   const STYLE_VERSION = 8; // Required for declaring a style, may change in the future
-  
+
   useEffect(() => {
     if (!mapContainer.current) return;
     const API_KEY = process.env.MAPTILER_API_KEY;
@@ -28,7 +26,7 @@ const Map: React.FC<MapProps> = ({ onStateSelect }) => {
         version: STYLE_VERSION,
         sources: {},
         layers: [],
-        glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${API_KEY}`
+        glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${API_KEY}`,
       },
       center: [-98.5795, 39.8283], // USA-center
       zoom: 4,

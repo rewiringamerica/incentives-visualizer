@@ -1,5 +1,5 @@
-import maplibregl from "maplibre-gl";
-import { US_STATE_NAMES } from "../data/states";
+import maplibregl from 'maplibre-gl';
+import { US_STATE_NAMES } from '../data/states';
 
 export interface StateData {
   name: string;
@@ -44,60 +44,60 @@ function loadStates(
   });
 
   const labelLayout = {
-    "text-field": "{name:en}",
-    "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-    "text-size": 12,
-    "text-offset": [0, 0],
-    "symbol-placement": "point",
+    'text-field': '{name:en}',
+    'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+    'text-size': 12,
+    'text-offset': [0, 0],
+    'symbol-placement': 'point',
   };
 
   const labelPaint = {
-    "text-color": "#000000",
+    'text-color': '#000000',
   };
 
   map.addLayer({
-    id: "state-labels-layer",
-    type: "symbol",
+    id: 'state-labels-layer',
+    type: 'symbol',
     source: {
-      type: "vector",
+      type: 'vector',
       url: `https://api.maptiler.com/tiles/v3-openmaptiles/tiles.json?key=${API_KEY}`,
     },
-    "source-layer": "place",
+    'source-layer': 'place',
     filter: [
-      "all",
-      ["in", "class", "state", "island"],
-      ["in", "name:en", ...US_STATE_NAMES],
+      'all',
+      ['in', 'class', 'state', 'island'],
+      ['in', 'name:en', ...US_STATE_NAMES],
     ],
     layout: labelLayout,
     paint: labelPaint,
   });
 
   // Used for Hawaii and DC
-  map.addSource("statesLabelData", {
-    type: "vector",
+  map.addSource('statesLabelData', {
+    type: 'vector',
     url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${API_KEY}`,
   });
 
   // Add layer for Hawaii label (doesn't show up in the state-labels-layer)
   map.addLayer({
-    id: "hawaii-label",
-    type: "symbol",
-    source: "statesLabelData",
-    "source-layer": "place",
-    filter: ["all", ["==", "class", "state"], ["==", "name:en", "Hawaii"]],
+    id: 'hawaii-label',
+    type: 'symbol',
+    source: 'statesLabelData',
+    'source-layer': 'place',
+    filter: ['all', ['==', 'class', 'state'], ['==', 'name:en', 'Hawaii']],
     layout: labelLayout,
     paint: labelPaint,
   });
 
   map.addLayer({
-    id: "dc-label",
-    type: "symbol",
-    source: "statesLabelData",
-    "source-layer": "place",
+    id: 'dc-label',
+    type: 'symbol',
+    source: 'statesLabelData',
+    'source-layer': 'place',
     filter: [
-      "all",
-      ["==", "class", "state"],
-      ["==", "name:en", "Washington, D.C."],
+      'all',
+      ['==', 'class', 'state'],
+      ['==', 'name:en', 'Washington, D.C.'],
     ],
     layout: labelLayout,
     paint: labelPaint,
@@ -176,13 +176,13 @@ function loadStates(
 // Zoom to the selected state, using the state border as the bounding box
 function zoomToState(
   map: maplibregl.Map,
-  feature: maplibregl.MapGeoJSONFeature
+  feature: maplibregl.MapGeoJSONFeature,
 ) {
   const bounds = [Infinity, Infinity, -Infinity, -Infinity];
 
   function processCoordinates(coords) {
     if (Array.isArray(coords[0])) {
-      coords.map((c) => processCoordinates(c));
+      coords.map(c => processCoordinates(c));
     } else {
       bounds[0] = Math.min(bounds[0], coords[0]);
       bounds[1] = Math.min(bounds[1], coords[1]);

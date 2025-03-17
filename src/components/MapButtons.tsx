@@ -35,7 +35,7 @@ const MapButtons: React.FC<MapButtonsProps> = ({ setMapView, mapStyle }) => {
     initInsetMap(mainlandRef.current, [-98.5795, 39.8283], 0);
     initInsetMap(alaskaRef.current, [-152.4044, 64.2008], 0);
     initInsetMap(hawaiiRef.current, [-157.8583, 21.3069], 0);
-  }, [mapStyle]); 
+  }, [mapStyle]);
 
   return (
     <div className="absolute bottom-5 left-5 flex flex-row gap-3 z-[1000]">
