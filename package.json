@@ -8,7 +8,9 @@
     "start": "parcel serve src/index.html",
     "build": "parcel build src/index.html",
     "generate-types": "npx openapi-typescript https://api.rewiringamerica.org/spec.json --output src/types/api.gen.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "lint": "eslint --fix",
+    "prepare": "husky"
   },
   "keywords": [],
   "dependencies": {
@@ -27,7 +29,12 @@
     "@types/node": "^22.13.1",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
+    "@typescript-eslint/eslint-plugin": "6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "8.52.0",
+    "husky": "^9.1.7",
+    "lint-staged": "15.4.3",
     "openapi-typescript": "^7.6.1",
     "postcss": "^8.5.1",
     "prettier": "3.0.3",
@@ -37,5 +44,11 @@
     "tailwindcss": "^4.0.3",
     "typescript": "^5.7.3"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "lint-staged": {
+    "{src}/**/*.{ts,tsx,json,md,css,html}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  }
 }
