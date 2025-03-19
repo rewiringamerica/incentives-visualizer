@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('Map Component', () => {
   test.beforeEach(async ({ page }) => {
@@ -11,7 +11,13 @@ test.describe('Map Component', () => {
     await expect(mapCanvas).toBeVisible();
   });
 
-  test('should initialize the map with the correct center and zoom', async ({ page }) => {
+  test('should initialize the map with the correct center and zoom', async ({
+    page,
+  }) => {
+    await page.waitForFunction(
+      () => (window as any).maplibreglMap?.isStyleLoaded(),
+    );
+
     const center = await page.evaluate(() => {
       const map = (window as any).maplibreglMap;
       return map.getCenter().toArray();
@@ -26,10 +32,16 @@ test.describe('Map Component', () => {
   });
 
   test('should call loadStates on map load', async ({ page }) => {
-    const loadStatesCalled = await page.evaluate(() => {
-      return (window as any).loadStatesCalled;
-    });
+    await page.waitForFunction(
+      () => (window as any).maplibreglMap !== undefined,
+    );
+    await page.waitForFunction(
+      () => (window as any).loadStatesCalled !== undefined,
+    );
 
+    const loadStatesCalled = await page.evaluate(
+      () => (window as any).loadStatesCalled,
+    );
     expect(loadStatesCalled).toBe(true);
   });
 });

@@ -1,39 +1,37 @@
 vi.mock('../mocks/data', () => ({
   mockIncentivesData: {
     incentives: [
-        {
-          id: 'CA-1',
-          program: 'ca_CaliforniaEnergySmartHomes',
-          payment_methods: [PaymentMethod.REBATE],
-          items: [
-            'other_heat_pump',
-            'heat_pump_water_heater',
-            'electric_stove',
-            'heat_pump_clothes_dryer',
-            'non_heat_pump_clothes_dryer',
-          ],
-          amount: {
-            type: 'dollar_amount',
-            number: 4250,
-          },
-          owner_status: [OwnerStatus.HOMEOWNER],
-          short_description: {
-            en: '$4,250 rebate for installing heat pump space heating, heat pump water heating, induction cooking, and an electric dryer (must install all).',
-            es: 'Reembolso de $4,250 por instalar calefacción con bomba de calor, calentador de agua con bomba de calor, cocina de inducción y secadora eléctrica (debe instalar todo).',
-          },
-          start_date: '2024-01-01',
-          end_date: '2024-12-31',
-          eligible_geo_group: 'ca-energy-smart-homes-territories',
+      {
+        id: 'CA-1',
+        program: 'ca_CaliforniaEnergySmartHomes',
+        payment_methods: [PaymentMethod.REBATE],
+        items: [
+          'other_heat_pump',
+          'heat_pump_water_heater',
+          'electric_stove',
+          'heat_pump_clothes_dryer',
+          'non_heat_pump_clothes_dryer',
+        ],
+        amount: {
+          type: 'dollar_amount',
+          number: 4250,
         },
-      ],
+        owner_status: [OwnerStatus.HOMEOWNER],
+        short_description: {
+          en: '$4,250 rebate for installing heat pump space heating, heat pump water heating, induction cooking, and an electric dryer (must install all).',
+          es: 'Reembolso de $4,250 por instalar calefacción con bomba de calor, calentador de agua con bomba de calor, cocina de inducción y secadora eléctrica (debe instalar todo).',
+        },
+        start_date: '2024-01-01',
+        end_date: '2024-12-31',
+        eligible_geo_group: 'ca-energy-smart-homes-territories',
+      },
+    ],
   },
 }));
 
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import Sidebar, { ChipData } from '../src/components/Sidebar';
-import { beforeEach, expect, test, vi } from 'vitest';
-import { describe, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import Sidebar from '../src/components/Sidebar';
 import { OwnerStatus, PaymentMethod } from '../src/mocks/types';
 
 describe('Sidebar Component', () => {
@@ -51,7 +49,9 @@ describe('Sidebar Component', () => {
 
   test('renders nothing when stateData is not provided', () => {
     render(<Sidebar />);
-    expect(screen.queryByText(/select a state on the map to view details/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/select a state on the map to view details/i),
+    ).not.toBeInTheDocument();
   });
 
   test('renders the sidebar when stateData is provided', () => {
@@ -68,7 +68,12 @@ describe('Sidebar Component', () => {
   });
 
   test('renders chips and toggles their selection state', () => {
-    render(<Sidebar stateData={mockStateData} onChipSelectionChange={mockOnChipSelectionChange} />);
+    render(
+      <Sidebar
+        stateData={mockStateData}
+        onChipSelectionChange={mockOnChipSelectionChange}
+      />,
+    );
     const spanElement = screen.getByText('Incentive 1');
     const chipButton = spanElement.closest('button');
 
@@ -80,7 +85,7 @@ describe('Sidebar Component', () => {
       expect(mockOnChipSelectionChange).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({ id: 'chip1', selected: false }),
-        ])
+        ]),
       );
     }
   });
@@ -88,11 +93,15 @@ describe('Sidebar Component', () => {
   test('renders incentives when stateData is provided', () => {
     render(<Sidebar stateData={mockStateData} />);
     // Check that the incentive program title for California is displayed
-    expect(screen.getByText('ca_CaliforniaEnergySmartHomes')).toBeInTheDocument();
+    expect(
+      screen.getByText('ca_CaliforniaEnergySmartHomes'),
+    ).toBeInTheDocument();
   });
 
   test('displays a placeholder message when no stateData is provided', () => {
     render(<Sidebar />);
-    expect(screen.queryByText(/select a state on the map to view details/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/select a state on the map to view details/i),
+    ).not.toBeInTheDocument();
   });
 });
