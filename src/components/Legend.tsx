@@ -31,7 +31,9 @@ class CustomLegendControl {
   }
 
   updateLegend() {
-    if (!this._map || !this._container) {return;}
+    if (!this._map || !this._container) {
+      return;
+    }
 
     // updates the legend with map style for state
     const outlineColor = this._map.getPaintProperty(
@@ -66,7 +68,9 @@ class CustomLegendControl {
       'fill-opacity',
     );
 
-    if (!fillColorCoverage) {return;}
+    if (!fillColorCoverage) {
+      return;
+    }
 
     this._container.innerHTML = `
       <strong>Legend</strong>
@@ -98,7 +102,7 @@ class CustomLegendControl {
           border: 2px solid ${outlineColor || 'black'}; 
           margin-right: 5px; display: inline-block;">
         </span>
-        <span>No Coverage States</span>
+        <span>Uncovered States</span>
       </div>
     `;
   }
@@ -110,7 +114,9 @@ interface LegendProps {
 
 const Legend: React.FC<LegendProps> = ({ map }) => {
   useEffect(() => {
-    if (!map) {return;}
+    if (!map) {
+      return;
+    }
 
     const legendControl = new CustomLegendControl();
     map.addControl(legendControl, 'bottom-right');
