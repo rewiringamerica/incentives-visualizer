@@ -91,7 +91,7 @@ function loadStates(
   // Add layer for states with beta coverage
   // Add layer for states with no coverage
   map.addLayer({
-    id: 'states-no-coverage-layer',
+    id: 'states-beta-layer',
     type: 'fill',
     source: 'statesData',
     'source-layer': 'administrative',
