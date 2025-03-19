@@ -31,11 +31,47 @@ function loadStates(
     generateId: true,
   });
 
+  // Color options: #fcf6e1, #F9D65B, #89ccb8, #1f7c96
+
   // Add a states layer; adjust the filter as needed for state boundaries
   map.addLayer({
     id: 'states-layer',
     type: 'fill',
     source: 'statesData',
+    paint: {
+      'fill-color': '#FCF6E1',
+      'fill-outline-color': '#1E1E1E',
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0.75,
+      ],
+    },
+  });
+
+  // Add a layer for the covered states
+  const coverageStatesAbb = STATES_PLUS_DC.filter(state =>
+    LAUNCHED_STATES.includes(state),
+  );
+
+  // Convert state abbrevs to full state name
+  const coverageStates = coverageStatesAbb.map(
+    stateAbb => STATE_ABBREVIATION_TO_NAME[stateAbb],
+  );
+
+  // Add layer for states with coverage
+  map.addLayer({
+    id: 'states-coverage-layer',
+    type: 'fill',
+    source: 'statesData',
+    'source-layer': 'administrative',
+    filter: [
+      'all',
+      ['==', 'level', 1],
+      ['==', 'iso_a2', 'US'],
+      ['in', 'name:en', ...coverageStates],
+    ],
     paint: {
       'fill-color': '#F9D65B',
       'fill-outline-color': '#1E1E1E',
@@ -53,7 +89,7 @@ function loadStates(
     state => !LAUNCHED_STATES.includes(state) && !BETA_STATES.includes(state),
   );
 
-  // convert state abbrevs to full state name
+  // Convert state abbrevs to full state name
   const noCoverageStates = noCoverageStatesAbb.map(
     stateAbb => STATE_ABBREVIATION_TO_NAME[stateAbb],
   );
@@ -71,13 +107,13 @@ function loadStates(
       ['in', 'name:en', ...noCoverageStates],
     ],
     paint: {
-      'fill-color': '#FFF8DE',
+      'fill-color': '#1F7C96',
       'fill-outline-color': '#1E1E1E',
       'fill-opacity': [
         'case',
         ['boolean', ['feature-state', 'hover'], false],
         1,
-        0.75,
+        0.5,
       ],
     },
   });
@@ -88,7 +124,6 @@ function loadStates(
   );
 
   // Add layer for states with beta coverage
-  // Add layer for states with no coverage
   map.addLayer({
     id: 'states-beta-layer',
     type: 'fill',
@@ -101,13 +136,13 @@ function loadStates(
       ['in', 'name:en', ...betaStates],
     ],
     paint: {
-      'fill-color': '#FAE8A5',
+      'fill-color': '#89CCB8',
       'fill-outline-color': '#1E1E1E',
       'fill-opacity': [
         'case',
         ['boolean', ['feature-state', 'hover'], false],
         1,
-        0.75,
+        0.5,
       ],
     },
   });
