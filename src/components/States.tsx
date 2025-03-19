@@ -1,6 +1,12 @@
 import maplibregl from 'maplibre-gl';
 import geojsonData from '../data/geojson/states-albers.json';
-import { addLabels } from './MapLabels';
+import { STATE_ABBREVIATION_TO_NAME } from '../data/abbrevsToFull';
+import {
+  BETA_STATES,
+  LAUNCHED_STATES,
+  STATES_PLUS_DC,
+  US_STATE_NAMES,
+} from '../data/states';
 
 export interface StateData {
   name: string;
@@ -42,7 +48,129 @@ function loadStates(
     },
   });
 
-  addLabels(map, geojsonData as unknown as GeoJSON.FeatureCollection);
+  // Find states that have no coverage
+  const noCoverageStatesAbb = STATES_PLUS_DC.filter(
+    state => !LAUNCHED_STATES.includes(state) && !BETA_STATES.includes(state),
+  );
+
+  // convert state abbrevs to full state name
+  const noCoverageStates = noCoverageStatesAbb.map(
+    stateAbb => STATE_ABBREVIATION_TO_NAME[stateAbb],
+  );
+
+  // Add layer for states with no coverage
+  map.addLayer({
+    id: 'states-no-coverage-layer',
+    type: 'fill',
+    source: 'statesData',
+    'source-layer': 'administrative',
+    filter: [
+      'all',
+      ['==', 'level', 1],
+      ['==', 'iso_a2', 'US'],
+      ['in', 'name:en', ...noCoverageStates],
+    ],
+    paint: {
+      'fill-color': '#FFF8DE',
+      'fill-outline-color': '#1E1E1E',
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0.75,
+      ],
+    },
+  });
+
+  // convert beta states to full names
+  const betaStates = BETA_STATES.map(
+    stateAbb => STATE_ABBREVIATION_TO_NAME[stateAbb],
+  );
+
+  // Add layer for states with beta coverage
+  // Add layer for states with no coverage
+  map.addLayer({
+    id: 'states-no-coverage-layer',
+    type: 'fill',
+    source: 'statesData',
+    'source-layer': 'administrative',
+    filter: [
+      'all',
+      ['==', 'level', 1],
+      ['==', 'iso_a2', 'US'],
+      ['in', 'name:en', ...betaStates],
+    ],
+    paint: {
+      'fill-color': '#FAE8A5',
+      'fill-outline-color': '#1E1E1E',
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0.75,
+      ],
+    },
+  });
+
+  const labelLayout = {
+    'text-field': '{name:en}',
+    'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+    'text-size': 12,
+    'text-offset': [0, 0],
+    'symbol-placement': 'point',
+  };
+
+  const labelPaint = {
+    'text-color': '#000000',
+  };
+
+  map.addLayer({
+    id: 'state-labels-layer',
+    type: 'symbol',
+    source: {
+      type: 'vector',
+      url: `https://api.maptiler.com/tiles/v3-openmaptiles/tiles.json?key=${API_KEY}`,
+    },
+    'source-layer': 'place',
+    filter: [
+      'all',
+      ['in', 'class', 'state', 'island'],
+      ['in', 'name:en', ...US_STATE_NAMES],
+    ],
+    layout: labelLayout,
+    paint: labelPaint,
+  });
+
+  // Used for Hawaii and DC
+  map.addSource('statesLabelData', {
+    type: 'vector',
+    url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${API_KEY}`,
+  });
+
+  // Add layer for Hawaii label (doesn't show up in the state-labels-layer)
+  map.addLayer({
+    id: 'hawaii-label',
+    type: 'symbol',
+    source: 'statesLabelData',
+    'source-layer': 'place',
+    filter: ['all', ['==', 'class', 'state'], ['==', 'name:en', 'Hawaii']],
+    layout: labelLayout,
+    paint: labelPaint,
+  });
+
+  map.addLayer({
+    id: 'dc-label',
+    type: 'symbol',
+    source: 'statesLabelData',
+    'source-layer': 'place',
+    filter: [
+      'all',
+      ['==', 'class', 'state'],
+      ['==', 'name:en', 'Washington, D.C.'],
+    ],
+    layout: labelLayout,
+    paint: labelPaint,
+  });
 
   // Change cursor on enter
   map.on('mouseenter', 'states-layer', () => {
