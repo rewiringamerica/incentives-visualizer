@@ -1,5 +1,11 @@
 import maplibregl from 'maplibre-gl';
-import { US_STATE_NAMES } from '../data/states';
+import { STATE_ABBREVIATION_TO_NAME } from '../data/abbrevsToFull';
+import {
+  BETA_STATES,
+  LAUNCHED_STATES,
+  STATES_PLUS_DC,
+  US_STATE_NAMES,
+} from '../data/states';
 
 export interface StateData {
   name: string;
@@ -24,6 +30,8 @@ function loadStates(
     url: `https://api.maptiler.com/tiles/countries/tiles.json?key=${API_KEY}`,
   });
 
+  // Color options: #fcf6e1, #F9D65B, #89ccb8, #1f7c96
+
   // Add a states layer; adjust the filter as needed for state boundaries
   map.addLayer({
     id: 'states-layer',
@@ -32,7 +40,104 @@ function loadStates(
     'source-layer': 'administrative',
     filter: ['all', ['==', 'level', 1], ['==', 'iso_a2', 'US']],
     paint: {
+      'fill-color': '#FCF6E1',
+      'fill-outline-color': '#1E1E1E',
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0.75,
+      ],
+    },
+  });
+
+  // Add a layer for the covered states
+  const coverageStatesAbb = STATES_PLUS_DC.filter(state =>
+    LAUNCHED_STATES.includes(state),
+  );
+
+  // Convert state abbrevs to full state name
+  const coverageStates = coverageStatesAbb.map(
+    stateAbb => STATE_ABBREVIATION_TO_NAME[stateAbb],
+  );
+
+  // Add layer for states with coverage
+  map.addLayer({
+    id: 'states-coverage-layer',
+    type: 'fill',
+    source: 'statesData',
+    'source-layer': 'administrative',
+    filter: [
+      'all',
+      ['==', 'level', 1],
+      ['==', 'iso_a2', 'US'],
+      ['in', 'name:en', ...coverageStates],
+    ],
+    paint: {
       'fill-color': '#F9D65B',
+      'fill-outline-color': '#1E1E1E',
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0.5,
+      ],
+    },
+  });
+
+  // Find states that have no coverage
+  const noCoverageStatesAbb = STATES_PLUS_DC.filter(
+    state => !LAUNCHED_STATES.includes(state) && !BETA_STATES.includes(state),
+  );
+
+  // Convert state abbrevs to full state name
+  const noCoverageStates = noCoverageStatesAbb.map(
+    stateAbb => STATE_ABBREVIATION_TO_NAME[stateAbb],
+  );
+
+  // Add layer for states with no coverage
+  map.addLayer({
+    id: 'states-no-coverage-layer',
+    type: 'fill',
+    source: 'statesData',
+    'source-layer': 'administrative',
+    filter: [
+      'all',
+      ['==', 'level', 1],
+      ['==', 'iso_a2', 'US'],
+      ['in', 'name:en', ...noCoverageStates],
+    ],
+    paint: {
+      'fill-color': '#1F7C96',
+      'fill-outline-color': '#1E1E1E',
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0.5,
+      ],
+    },
+  });
+
+  // convert beta states to full names
+  const betaStates = BETA_STATES.map(
+    stateAbb => STATE_ABBREVIATION_TO_NAME[stateAbb],
+  );
+
+  // Add layer for states with beta coverage
+  map.addLayer({
+    id: 'states-beta-layer',
+    type: 'fill',
+    source: 'statesData',
+    'source-layer': 'administrative',
+    filter: [
+      'all',
+      ['==', 'level', 1],
+      ['==', 'iso_a2', 'US'],
+      ['in', 'name:en', ...betaStates],
+    ],
+    paint: {
+      'fill-color': '#89CCB8',
       'fill-outline-color': '#1E1E1E',
       'fill-opacity': [
         'case',
