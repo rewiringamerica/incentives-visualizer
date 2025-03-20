@@ -40,6 +40,9 @@ const Map: React.FC<MapProps> = ({ onStateSelect }) => {
       // Load states and pass the onStateSelect callback so a state click will notify the parent.
       loadStates(map, onStateSelect);
       setMapStyle(map.getStyle());
+      // Need to expose map for playwright tests
+      (window as any).maplibreglMap = map;
+      (window as any).loadStatesCalled = true;
     });
 
     mapRef.current = map;
