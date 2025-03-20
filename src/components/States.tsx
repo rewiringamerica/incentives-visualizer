@@ -1,5 +1,6 @@
 import maplibregl from 'maplibre-gl';
-import { US_STATE_NAMES } from '../data/states';
+import geojsonData from '../data/geojson/states-albers.json';
+import { addLabels } from './MapLabels';
 
 export interface StateData {
   name: string;
@@ -12,7 +13,6 @@ function loadStates(
   map: maplibregl.Map,
   onStateSelect?: (data: StateData) => void,
 ) {
-  const API_KEY = process.env.MAPTILER_API_KEY;
   let hoveredStateId: string | number | null = null;
   const tooltip = new maplibregl.Popup({
     closeButton: false,
@@ -20,8 +20,9 @@ function loadStates(
   });
 
   map.addSource('statesData', {
-    type: 'vector',
-    url: `https://api.maptiler.com/tiles/countries/tiles.json?key=${API_KEY}`,
+    type: 'geojson',
+    data: geojsonData as unknown as GeoJSON.FeatureCollection,
+    generateId: true,
   });
 
   // Add a states layer; adjust the filter as needed for state boundaries
@@ -29,8 +30,6 @@ function loadStates(
     id: 'states-layer',
     type: 'fill',
     source: 'statesData',
-    'source-layer': 'administrative',
-    filter: ['all', ['==', 'level', 1], ['==', 'iso_a2', 'US']],
     paint: {
       'fill-color': '#F9D65B',
       'fill-outline-color': '#1E1E1E',
@@ -43,65 +42,7 @@ function loadStates(
     },
   });
 
-  const labelLayout = {
-    'text-field': '{name:en}',
-    'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-    'text-size': 12,
-    'text-offset': [0, 0],
-    'symbol-placement': 'point',
-  };
-
-  const labelPaint = {
-    'text-color': '#000000',
-  };
-
-  map.addLayer({
-    id: 'state-labels-layer',
-    type: 'symbol',
-    source: {
-      type: 'vector',
-      url: `https://api.maptiler.com/tiles/v3-openmaptiles/tiles.json?key=${API_KEY}`,
-    },
-    'source-layer': 'place',
-    filter: [
-      'all',
-      ['in', 'class', 'state', 'island'],
-      ['in', 'name:en', ...US_STATE_NAMES],
-    ],
-    layout: labelLayout,
-    paint: labelPaint,
-  });
-
-  // Used for Hawaii and DC
-  map.addSource('statesLabelData', {
-    type: 'vector',
-    url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${API_KEY}`,
-  });
-
-  // Add layer for Hawaii label (doesn't show up in the state-labels-layer)
-  map.addLayer({
-    id: 'hawaii-label',
-    type: 'symbol',
-    source: 'statesLabelData',
-    'source-layer': 'place',
-    filter: ['all', ['==', 'class', 'state'], ['==', 'name:en', 'Hawaii']],
-    layout: labelLayout,
-    paint: labelPaint,
-  });
-
-  map.addLayer({
-    id: 'dc-label',
-    type: 'symbol',
-    source: 'statesLabelData',
-    'source-layer': 'place',
-    filter: [
-      'all',
-      ['==', 'class', 'state'],
-      ['==', 'name:en', 'Washington, D.C.'],
-    ],
-    layout: labelLayout,
-    paint: labelPaint,
-  });
+  addLabels(map, geojsonData as unknown as GeoJSON.FeatureCollection);
 
   // Change cursor on enter
   map.on('mouseenter', 'states-layer', () => {
@@ -111,30 +52,31 @@ function loadStates(
   // Set hover state and show tooltip
   map.on('mousemove', 'states-layer', e => {
     if (e.features && e.features.length > 0) {
-      // Reset previous hovered feature
       if (hoveredStateId !== null) {
         map.setFeatureState(
-          {
-            source: 'statesData',
-            sourceLayer: 'administrative',
-            id: hoveredStateId,
-          },
+          { source: 'statesData', id: hoveredStateId },
           { hover: false },
         );
       }
-      hoveredStateId = e.features[0].id;
+      hoveredStateId = e.features[0].id ?? null;
       map.setFeatureState(
-        {
-          source: 'statesData',
-          sourceLayer: 'administrative',
-          id: hoveredStateId,
-        },
+        { source: 'statesData', id: hoveredStateId },
         { hover: true },
       );
-      tooltip
-        .setLngLat(e.lngLat)
-        .setHTML(e.features[0].properties.name)
-        .addTo(map);
+
+      // Parse ste_name from ["Name"] to Name
+      const steNameRaw = e.features[0].properties.ste_name;
+      let steName = steNameRaw;
+      try {
+        const parsed = JSON.parse(steNameRaw);
+        if (Array.isArray(parsed)) {
+          steName = parsed[0];
+        }
+      } catch (error) {
+        console.error('Error parsing ste_name:', error);
+      }
+
+      tooltip.setLngLat(e.lngLat).setHTML(steName).addTo(map);
     }
   });
 
@@ -145,7 +87,6 @@ function loadStates(
       map.setFeatureState(
         {
           source: 'statesData',
-          sourceLayer: 'administrative',
           id: hoveredStateId,
         },
         { hover: false },
@@ -158,8 +99,20 @@ function loadStates(
   // On click, call the passed callback to select a state
   map.on('click', 'states-layer', e => {
     if (e.features && e.features.length > 0 && onStateSelect) {
+      console.log('State Name:', e.features[0].properties.name);
+
       const feature = e.features[0];
-      const stateName = feature.properties.name;
+      const stateNameRaw = feature.properties.ste_name;
+      let stateName = stateNameRaw;
+      try {
+        const parsed = JSON.parse(stateNameRaw);
+        if (Array.isArray(parsed)) {
+          stateName = parsed[0];
+        }
+      } catch (error) {
+        console.error('Error parsing ste_name:', error);
+      }
+
       const stateData: StateData = {
         name: stateName,
         description: `Details about ${stateName}...`,
@@ -191,11 +144,15 @@ function zoomToState(
     }
   }
 
-  if (feature.geometry && feature.geometry.coordinates) {
+  if (
+    feature.geometry &&
+    feature.geometry.type !== 'GeometryCollection' &&
+    'coordinates' in feature.geometry
+  ) {
     processCoordinates(feature.geometry.coordinates);
   }
 
-  map.fitBounds(bounds, {
+  map.fitBounds(bounds as [number, number, number, number], {
     padding: 40,
     maxZoom: 6,
     duration: 1000,
