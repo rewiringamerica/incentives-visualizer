@@ -31,36 +31,78 @@ class CustomLegendControl {
   }
 
   updateLegend() {
-    if (!this._map || !this._container) {return;}
+    if (!this._map || !this._container) {
+      return;
+    }
 
     // updates the legend with map style for state
-    const fillColor = this._map.getPaintProperty('states-layer', 'fill-color');
     const outlineColor = this._map.getPaintProperty(
       'states-layer',
       'fill-outline-color',
     );
-    const fillOpacity = this._map.getPaintProperty(
-      'states-layer',
+
+    const fillColorCoverage = this._map.getPaintProperty(
+      'states-coverage-layer',
+      'fill-color',
+    );
+    const fillOpacityCoverage = this._map.getPaintProperty(
+      'states-coverage-layer',
       'fill-opacity',
     );
 
-    if (!fillColor) {return;}
+    const fillColorBeta = this._map.getPaintProperty(
+      'states-beta-layer',
+      'fill-color',
+    );
+    const fillOpacityBeta = this._map.getPaintProperty(
+      'states-beta-layer',
+      'fill-opacity',
+    );
+
+    const fillColorNoCoverage = this._map.getPaintProperty(
+      'states-no-coverage-layer',
+      'fill-color',
+    );
+    const fillOpacityNoCoverage = this._map.getPaintProperty(
+      'states-no-coverage-layer',
+      'fill-opacity',
+    );
+
+    if (!fillColorCoverage) {
+      return;
+    }
 
     this._container.innerHTML = `
       <strong>Legend</strong>
-      <div style="display: flex; align-items: center; margin-top: 5px;">
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 2vh;">
         <span style="
           width: 20px; height: 20px; 
-          background: ${
-            Array.isArray(fillColor) ? fillColor.join(', ') : fillColor
-          }; 
-          opacity: ${
-            Array.isArray(fillOpacity) ? fillOpacity.join(', ') : fillOpacity
-          };
+          background: ${fillColorCoverage}; 
+          opacity: ${fillOpacityCoverage};
           border: 2px solid ${outlineColor || 'black'}; 
           margin-right: 5px; display: inline-block;">
         </span>
-        <span>US States</span>
+        <span>Covered States</span>
+      </div>
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+        <span style="
+          width: 20px; height: 20px; 
+          background: ${fillColorBeta}; 
+          opacity: ${fillOpacityBeta};
+          border: 2px solid ${outlineColor || 'black'}; 
+          margin-right: 5px; display: inline-block;">
+        </span>
+        <span>Beta States</span>
+      </div>
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
+        <span style="
+          width: 20px; height: 20px; 
+          background: ${fillColorNoCoverage}; 
+          opacity: ${fillOpacityNoCoverage};
+          border: 2px solid ${outlineColor || 'black'}; 
+          margin-right: 5px; display: inline-block;">
+        </span>
+        <span>Uncovered States</span>
       </div>
     `;
   }
@@ -72,10 +114,12 @@ interface LegendProps {
 
 const Legend: React.FC<LegendProps> = ({ map }) => {
   useEffect(() => {
-    if (!map) {return;}
+    if (!map) {
+      return;
+    }
 
     const legendControl = new CustomLegendControl();
-    map.addControl(legendControl as maplibregl.IControl, 'bottom-right');
+    map.addControl(legendControl, 'bottom-right');
 
     const update = () => legendControl.updateLegend();
     map.on('styledata', update);
@@ -83,8 +127,7 @@ const Legend: React.FC<LegendProps> = ({ map }) => {
 
     return () => {
       map.off('styledata', update);
-      map.off('sourcedata', update);
-      map.removeControl(legendControl as maplibregl.IControl);
+      map.removeControl(legendControl);
     };
   }, [map]);
 
