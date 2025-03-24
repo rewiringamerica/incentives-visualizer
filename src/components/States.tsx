@@ -31,7 +31,7 @@ function loadStates(
     generateId: true,
   });
 
-  // Color options: #fcf6e1, #F9D65B, #89ccb8, #1f7c96
+  // Color options: #fcf6e1, #F9D65B, #71c4cb, #6e33cf
 
   // Add a states layer; adjust the filter as needed for state boundaries
   map.addLayer({
@@ -107,7 +107,7 @@ function loadStates(
       ['in', 'name:en', ...noCoverageStates],
     ],
     paint: {
-      'fill-color': '#1F7C96',
+      'fill-color': '#6E33CF',
       'fill-outline-color': '#1E1E1E',
       'fill-opacity': [
         'case',
@@ -136,7 +136,7 @@ function loadStates(
       ['in', 'name:en', ...betaStates],
     ],
     paint: {
-      'fill-color': '#89CCB8',
+      'fill-color': '#71C4CB',
       'fill-outline-color': '#1E1E1E',
       'fill-opacity': [
         'case',
