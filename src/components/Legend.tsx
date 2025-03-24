@@ -31,7 +31,7 @@ class CustomLegendControl {
   }
 
   updateLegend() {
-    if (!this._map || !this._container) return;
+    if (!this._map || !this._container) {return;}
 
     // updates the legend with map style for state
     const fillColor = this._map.getPaintProperty('states-layer', 'fill-color');
@@ -44,7 +44,7 @@ class CustomLegendControl {
       'fill-opacity',
     );
 
-    if (!fillColor) return;
+    if (!fillColor) {return;}
 
     this._container.innerHTML = `
       <strong>Legend</strong>
@@ -72,17 +72,19 @@ interface LegendProps {
 
 const Legend: React.FC<LegendProps> = ({ map }) => {
   useEffect(() => {
-    if (!map) return;
+    if (!map) {return;}
 
     const legendControl = new CustomLegendControl();
-    map.addControl(legendControl as any, 'bottom-right');
+    map.addControl(legendControl as maplibregl.IControl, 'bottom-right');
 
     const update = () => legendControl.updateLegend();
     map.on('styledata', update);
+    map.on('sourcedata', update);
 
     return () => {
       map.off('styledata', update);
-      map.removeControl(legendControl as any);
+      map.off('sourcedata', update);
+      map.removeControl(legendControl as maplibregl.IControl);
     };
   }, [map]);
 
