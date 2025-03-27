@@ -12,7 +12,9 @@ interface LabelData {
 export function addLabels(map: maplibregl.Map, geojsonData: FeatureCollection) {
   const labels: LabelData[] = geojsonData.features
     .map(feature => {
-      if (!feature.geometry) {return null;}
+      if (!feature.geometry) {
+        return null;
+      }
 
       const stateName = feature.properties?.ste_name;
       const centroid = turf.centerOfMass(feature).geometry.coordinates as [
@@ -20,22 +22,24 @@ export function addLabels(map: maplibregl.Map, geojsonData: FeatureCollection) {
         number,
       ];
 
-      if (!stateName || !centroid) {return null;}
+      if (!stateName || !centroid) {
+        return null;
+      }
 
-      if (stateName[0] === 'Alaska') {
+      if (stateName === 'Alaska') {
         centroid[0] += 1;
         centroid[1] += 1;
       }
 
-      if (stateName[0] === 'Louisiana') {
+      if (stateName === 'Louisiana') {
         centroid[1] -= 0.5;
       }
 
-      if (stateName[0] === 'Florida') {
+      if (stateName === 'Florida') {
         centroid[0] += 1;
       }
 
-      if (stateName[0] === 'Michigan') {
+      if (stateName === 'Michigan') {
         centroid[0] += 1;
         centroid[1] -= 1;
       }
