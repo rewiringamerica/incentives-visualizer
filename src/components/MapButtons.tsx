@@ -20,8 +20,11 @@ const MapButtons: React.FC<MapButtonsProps> = ({ setMapView, mapStyle }) => {
       center: [number, number],
       zoom: number,
     ) => {
-      if (!container) return;
+      if (!container) {
+        return;
+      }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const insetMap = new maplibregl.Map({
         container,
         style: mapStyle,
