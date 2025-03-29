@@ -196,7 +196,7 @@ function zoomToCounty(
 
   map.fitBounds(bounds as [number, number, number, number], {
     padding: 40,
-    maxZoom: 6,
+    maxZoom: 10,
     duration: 1000,
   });
 }
