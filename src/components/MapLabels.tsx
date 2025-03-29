@@ -74,6 +74,7 @@ export function addLabels(map: maplibregl.Map, geojsonData: FeatureCollection) {
     id: LABEL_LAYER_ID,
     type: 'symbol',
     source: LABEL_LAYER_ID,
+    maxzoom: 6,
     layout: {
       'text-field': ['get', 'name'],
       'text-size': 10,
