@@ -41,6 +41,7 @@ function loadStates(
     id: 'states-layer',
     type: 'fill',
     source: 'statesData',
+    maxzoom: 6,
     paint: {
       'fill-color': '#FCF6E1',
       'fill-outline-color': '#1E1E1E',
@@ -68,6 +69,7 @@ function loadStates(
     id: 'states-coverage-layer',
     type: 'fill',
     source: 'statesData',
+    maxzoom: 6,
     filter: [
       'all',
       ['in', 'ste_name', ...coverageStates],
@@ -99,6 +101,7 @@ function loadStates(
     id: 'states-no-coverage-layer',
     type: 'fill',
     source: 'statesData',
+    maxzoom: 6,
     filter: [
       'all',
       ['in', 'ste_name', ...noCoverageStates],
@@ -125,6 +128,7 @@ function loadStates(
     id: 'states-beta-layer',
     type: 'fill',
     source: 'statesData',
+    maxzoom: 6,
     filter: [
       'all',
       ['in', 'ste_name', ...betaStates],
@@ -189,8 +193,6 @@ function loadStates(
   // On click, call the passed callback to select a state
   map.on('click', 'states-layer', e => {
     if (e.features && e.features.length > 0 && onStateSelect) {
-      console.log('State Name:', e.features[0].properties.name);
-
       const feature = e.features[0];
       const stateName = feature.properties.ste_name;
 

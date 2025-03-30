@@ -15,12 +15,16 @@ interface SidebarProps {
     name: string;
     description: string;
   };
+  countyData?: {
+    name: string;
+    description: string;
+  };
   onChipSelectionChange?: (chips: ChipData[]) => void;
   onClose?: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = props => {
-  const { stateData, onChipSelectionChange, onClose } = props;
+  const { stateData, countyData, onChipSelectionChange, onClose } = props;
 
   const [isVisible, setIsVisible] = useState(false);
   const [chips, setChips] = useState<ChipData[]>([
@@ -36,9 +40,9 @@ const Sidebar: React.FC<SidebarProps> = props => {
   ]);
 
   useEffect(() => {
-    // Show the sidebar if stateData exists; hide otherwise
-    setIsVisible(!!stateData);
-  }, [stateData]);
+    // Show the sidebar if stateData or countyData exists; hide otherwise
+    setIsVisible(!!stateData || !!countyData);
+  }, [stateData, countyData]);
 
   const toggleChip = (id: string) => {
     const updatedChips = chips.map(chip =>
@@ -130,8 +134,28 @@ const Sidebar: React.FC<SidebarProps> = props => {
               ))}
             </div>
           </div>
+        ) : countyData ? (
+          <div>
+            <h2 className="text-xl font-bold mb-2">{countyData.name}</h2>
+            <p>{countyData.description}</p>
+            <div className="mt-4 space-y-4">
+              {mockIncentivesData.incentives.map((incentive: Incentive) => (
+                <IncentiveCard
+                  key={incentive.id}
+                  typeChips={incentive.payment_methods}
+                  headline={incentive.program}
+                  subHeadline={incentive.eligible_geo_group || ''}
+                  body={incentive.short_description.en}
+                  warningChip={
+                    incentive.low_income ? 'Low Income Eligible' : null
+                  }
+                  buttonUrl={incentive.more_info_url?.en || null}
+                />
+              ))}
+            </div>
+          </div>
         ) : (
-          <p>Select a state on the map to view details.</p>
+          <p>Select a state or county on the map to view details.</p>
         )}
       </div>
     </div>
