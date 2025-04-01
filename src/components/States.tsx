@@ -1,6 +1,6 @@
 import maplibregl from 'maplibre-gl';
-import geojsonData from '../data/geojson/states-albers.json';
 import { STATE_ABBREVIATION_TO_NAME } from '../data/abbrevsToFull';
+import geojsonData from '../data/geojson/states-albers.json';
 import {
   BETA_STATES,
   LAUNCHED_STATES,
@@ -19,6 +19,7 @@ function loadStates(
   map: maplibregl.Map,
   onStateSelect?: (data: StateData) => void,
 ) {
+  const API_KEY = process.env.MAPTILER_API_KEY;
   let hoveredStateId: string | number | null = null;
   const tooltip = new maplibregl.Popup({
     closeButton: false,
@@ -322,8 +323,4 @@ function zoomToState(
   });
 }
 
-function resetStateSelection() {
-  isStateSelected = false;
-}
-
-export { loadStates, resetStateSelection };
+export { loadStates, zoomToState };
