@@ -9,8 +9,6 @@ export interface StateData {
   description: string;
 }
 
-let isStateSelected = false;
-
 function loadStates(
   map: maplibregl.Map,
   onStateSelect?: (data: StateData) => void,
@@ -201,10 +199,7 @@ function loadStates(
         description: `Details about ${stateName}...`,
       };
       onStateSelect(stateData);
-      if (!isStateSelected) {
-        zoomToState(map, feature);
-        isStateSelected = true;
-      }
+      zoomToState(map, feature);
     }
   });
 }

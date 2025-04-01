@@ -73,6 +73,12 @@ const Navbar: React.FC<NavbarProps> = ({ map, zoomToState, onStateSelect }) => {
           options={US_STATE_NAMES}
           inputValue={searchTerm}
           onInputChange={(event, value) => handleSearchChange(event, value)}
+          onKeyDown={event => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              handleSubmit();
+            }
+          }}
           disableClearable
           renderInput={params => (
             <TextField
