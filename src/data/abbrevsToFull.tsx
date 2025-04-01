@@ -49,5 +49,5 @@ export const STATE_ABBREVIATION_TO_NAME: Record<string, string> = {
   WV: 'West Virginia',
   WI: 'Wisconsin',
   WY: 'Wyoming',
-  DC: 'Washington, D.C.',
+  DC: 'District of Columbia',
 };

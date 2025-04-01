@@ -22,6 +22,9 @@ package-lock.json
 **/public
 **/src/types/api.gen.ts
 
+# data
+**/data
+
 # misc
 .DS_Store
 .github/pull_request_template.md

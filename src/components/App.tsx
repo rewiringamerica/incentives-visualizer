@@ -1,25 +1,29 @@
 import maplibregl from 'maplibre-gl';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
+import { CountyData, loadCounties } from './Counties';
 import Legend from './Legend';
 import NavBar from './Navbar';
 import Sidebar from './Sidebar';
-import { loadStates, zoomToState } from './States';
-
-export interface StateData {
-  name: string;
-  description: string;
-}
+import { loadStates, StateData, zoomToState } from './States';
 
 const App: React.FC = () => {
   const [selectedState, setSelectedState] = useState<StateData | null>(null);
+  const [selectedCounty, setSelectedCounty] = useState<CountyData | null>(null);
 
   const handleStateSelect = useCallback((data: StateData) => {
     setSelectedState(data);
+    setSelectedCounty(null); // Clear county selection when state is selected
+  }, []);
+
+  const handleCountySelect = useCallback((data: CountyData) => {
+    setSelectedCounty(data);
+    setSelectedState(null); // Clear state selection when county is selected
   }, []);
 
   const handleSidebarClose = useCallback(() => {
     setSelectedState(null);
+    setSelectedCounty(null);
   }, []);
 
   const mapContainer = useRef<HTMLDivElement | null>(null);
@@ -49,6 +53,7 @@ const App: React.FC = () => {
 
     map.on('load', () => {
       // Load states and pass the onStateSelect callback so a state click will notify the parent.
+      loadCounties(map, handleCountySelect);
       loadStates(map, handleStateSelect);
       setMapInstance(map);
     });
@@ -64,9 +69,12 @@ const App: React.FC = () => {
         onStateSelect={handleStateSelect}
       />
       <div className="flex h-[calc(100vh-64px)]">
-        <Sidebar stateData={selectedState} onClose={handleSidebarClose} />
+        <Sidebar
+          stateData={selectedState}
+          countyData={selectedCounty}
+          onClose={handleSidebarClose}
+        />
         <div className="w-full h-full">
-          {/* <Map onStateSelect={handleStateSelect} /> */}
           <div className="relative w-full h-full">
             <div
               ref={mapContainer}
