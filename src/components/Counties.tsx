@@ -9,8 +9,6 @@ export interface CountyData {
   description: string;
 }
 
-let isCountySelected = false;
-
 export function loadCounties(
   map: maplibregl.Map,
   onCountySelect?: (data: CountyData) => void,
@@ -160,10 +158,7 @@ export function loadCounties(
         description: `Details about ${countyName || 'Unknown County'}...`,
       };
       onCountySelect(countyData);
-      if (!isCountySelected) {
-        zoomToCounty(map, feature);
-        isCountySelected = true;
-      }
+      zoomToCounty(map, feature);
     }
   });
 }
@@ -199,8 +194,4 @@ function zoomToCounty(
     maxZoom: 10,
     duration: 1000,
   });
-}
-
-export function resetCountySelection() {
-  isCountySelected = false;
 }
