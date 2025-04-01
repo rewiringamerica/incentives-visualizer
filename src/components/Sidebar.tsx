@@ -1,14 +1,62 @@
 import React, { useEffect, useState } from 'react';
-import placeholderIcon from '../assets/placeholder_icon.png';
 import { mockIncentivesData } from '../mocks/data';
 import { Incentive } from '../mocks/types';
 import { IncentiveCard } from './incentive-card';
+import IncentivesFilter from './IncentivesFilter';
 
-export interface ChipData {
-  id: string;
-  label: string;
-  selected: boolean;
-}
+// Added dictionary mapping full state names to abbreviations
+const STATE_NAME_TO_ABBR: { [key: string]: string } = {
+  Alabama: 'AL',
+  Alaska: 'AK',
+  Arizona: 'AZ',
+  Arkansas: 'AR',
+  California: 'CA',
+  Colorado: 'CO',
+  Connecticut: 'CT',
+  Delaware: 'DE',
+  Florida: 'FL',
+  Georgia: 'GA',
+  Hawaii: 'HI',
+  Idaho: 'ID',
+  Illinois: 'IL',
+  Indiana: 'IN',
+  Iowa: 'IA',
+  Kansas: 'KS',
+  Kentucky: 'KY',
+  Louisiana: 'LA',
+  Maine: 'ME',
+  Maryland: 'MD',
+  Massachusetts: 'MA',
+  Michigan: 'MI',
+  Minnesota: 'MN',
+  Mississippi: 'MS',
+  Missouri: 'MO',
+  Montana: 'MT',
+  Nebraska: 'NE',
+  Nevada: 'NV',
+  'New Hampshire': 'NH',
+  'New Jersey': 'NJ',
+  'New Mexico': 'NM',
+  'New York': 'NY',
+  'North Carolina': 'NC',
+  'North Dakota': 'ND',
+  Ohio: 'OH',
+  Oklahoma: 'OK',
+  Oregon: 'OR',
+  Pennsylvania: 'PA',
+  'Rhode Island': 'RI',
+  'South Carolina': 'SC',
+  'South Dakota': 'SD',
+  Tennessee: 'TN',
+  Texas: 'TX',
+  Utah: 'UT',
+  Vermont: 'VT',
+  Virginia: 'VA',
+  Washington: 'WA',
+  'West Virginia': 'WV',
+  Wisconsin: 'WI',
+  Wyoming: 'WY',
+};
 
 interface SidebarProps {
   stateData?: {
@@ -19,39 +67,40 @@ interface SidebarProps {
     name: string;
     description: string;
   };
-  onChipSelectionChange?: (chips: ChipData[]) => void;
   onClose?: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = props => {
-  const { stateData, countyData, onChipSelectionChange, onClose } = props;
-
+  const { stateData, countyData, onClose } = props;
   const [isVisible, setIsVisible] = useState(false);
-  const [chips, setChips] = useState<ChipData[]>([
-    { id: 'chip1', label: 'Incentive 1', selected: true },
-    { id: 'chip2', label: 'Incentive 2', selected: true },
-    { id: 'chip3', label: 'Incentive 3', selected: true },
-    { id: 'chip4', label: 'Incentive 4', selected: true },
-    { id: 'chip5', label: 'Incentive 5', selected: true },
-    { id: 'chip6', label: 'Incentive 6', selected: true },
-    { id: 'chip7', label: 'Incentive 7', selected: true },
-    { id: 'chip8', label: 'Incentive 8', selected: true },
-    { id: 'chip9', label: 'Incentive 9', selected: true },
-  ]);
+  const [filterOptions, setFilterOptions] = useState<string[]>([]);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   useEffect(() => {
-    // Show the sidebar if stateData or countyData exists; hide otherwise
+    if (stateData) {
+      const stateAbbr = STATE_NAME_TO_ABBR[stateData.name] || '';
+      const filteredIncentives = mockIncentivesData.incentives.filter(
+        incentive => stateAbbr && incentive.id.startsWith(stateAbbr + '-'),
+      );
+      const optionsSet = new Set<string>();
+      filteredIncentives.forEach(incentive => {
+        incentive.items.forEach(item => optionsSet.add(item));
+      });
+      const options = Array.from(optionsSet);
+      setFilterOptions(options);
+      setSelectedFilters(options);
+    } else {
+      setFilterOptions([]);
+      setSelectedFilters([]);
+    }
+  }, [stateData]);
+
+  useEffect(() => {
     setIsVisible(!!stateData || !!countyData);
   }, [stateData, countyData]);
 
-  const toggleChip = (id: string) => {
-    const updatedChips = chips.map(chip =>
-      chip.id === id ? { ...chip, selected: !chip.selected } : chip,
-    );
-    setChips(updatedChips);
-    if (onChipSelectionChange) {
-      onChipSelectionChange(updatedChips);
-    }
+  const handleFilterChange = (selected: string[]) => {
+    setSelectedFilters(selected);
   };
 
   const handleClose = () => {
@@ -61,10 +110,23 @@ const Sidebar: React.FC<SidebarProps> = props => {
     }
   };
 
-  // If not visible, render nothing
   if (!isVisible) {
     return null;
   }
+
+  const stateAbbr = stateData ? STATE_NAME_TO_ABBR[stateData.name] || '' : '';
+  const stateIncentives = stateData
+    ? mockIncentivesData.incentives.filter(
+        incentive => stateAbbr && incentive.id.startsWith(stateAbbr + '-'),
+      )
+    : mockIncentivesData.incentives;
+
+  const filteredIncentives =
+    selectedFilters.length > 0
+      ? stateIncentives.filter(incentive =>
+          incentive.items.some(item => selectedFilters.includes(item)),
+        )
+      : []; // Return empty array instead of all state incentives when no filters are selected
 
   return (
     <div className="w-2/5 h-full bg-gray-100 relative overflow-y-auto">
@@ -89,49 +151,49 @@ const Sidebar: React.FC<SidebarProps> = props => {
         </svg>
       </button>
 
-      {/* Add some top padding so content sits below the close button */}
       <div className="pt-12 px-3 pb-4">
-        <div className="flex flex-wrap justify-center gap-2 mb-4">
-          {chips.map(chip => (
-            <button
-              key={chip.id}
-              onClick={() => toggleChip(chip.id)}
-              className={
-                chip.selected
-                  ? 'flex items-center px-2 py-1 text-sm rounded-full bg-[#eed87e] text-black border-0'
-                  : 'flex items-center px-2 py-1 text-sm rounded-full bg-gray-300 text-gray-700 border-0'
-              }
-            >
-              <input
-                type="checkbox"
-                checked={chip.selected}
-                readOnly
-                className="mr-1"
-              />
-              <img src={placeholderIcon} alt="icon" className="w-4 h-4 mr-1" />
-              <span>{chip.label}</span>
-            </button>
-          ))}
-        </div>
+        {stateData && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Filter by incentive type
+            </label>
+            <IncentivesFilter
+              options={filterOptions}
+              selectedOptions={selectedFilters}
+              onChange={handleFilterChange}
+            />
+            {selectedFilters.length === 0 && (
+              <p className="mt-2 text-sm text-orange-600">
+                Select at least one filter type to see available incentives.
+              </p>
+            )}
+          </div>
+        )}
 
         {stateData ? (
           <div>
             <h2 className="text-xl font-bold mb-2">{stateData.name}</h2>
             <p>{stateData.description}</p>
             <div className="mt-4 space-y-4">
-              {mockIncentivesData.incentives.map((incentive: Incentive) => (
-                <IncentiveCard
-                  key={incentive.id}
-                  typeChips={incentive.payment_methods}
-                  headline={incentive.program}
-                  subHeadline={incentive.eligible_geo_group || ''}
-                  body={incentive.short_description.en}
-                  warningChip={
-                    incentive.low_income ? 'Low Income Eligible' : null
-                  }
-                  buttonUrl={incentive.more_info_url?.en || null}
-                />
-              ))}
+              {filteredIncentives.length > 0 ? (
+                filteredIncentives.map((incentive: Incentive) => (
+                  <IncentiveCard
+                    key={incentive.id}
+                    typeChips={incentive.payment_methods}
+                    headline={incentive.program}
+                    subHeadline={incentive.eligible_geo_group || ''}
+                    body={incentive.short_description.en}
+                    warningChip={
+                      incentive.low_income ? 'Low Income Eligible' : null
+                    }
+                    buttonUrl={incentive.more_info_url?.en || null}
+                  />
+                ))
+              ) : (
+                <p className="text-gray-500">
+                  No incentives match the selected filters.
+                </p>
+              )}
             </div>
           </div>
         ) : countyData ? (
@@ -139,7 +201,7 @@ const Sidebar: React.FC<SidebarProps> = props => {
             <h2 className="text-xl font-bold mb-2">{countyData.name}</h2>
             <p>{countyData.description}</p>
             <div className="mt-4 space-y-4">
-              {mockIncentivesData.incentives.map((incentive: Incentive) => (
+              {filteredIncentives.map((incentive: Incentive) => (
                 <IncentiveCard
                   key={incentive.id}
                   typeChips={incentive.payment_methods}
