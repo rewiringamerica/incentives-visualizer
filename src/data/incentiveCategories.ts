@@ -1,10 +1,10 @@
 // Map from user-friendly categories to the exact API item keys
 export const INCENTIVE_CATEGORIES: Record<string, string[]> = {
-  'Clothes dryer': ['heat_pump_clothes_dryer', 'non_heat_pump_clothes_dryer'],
-  'Cooking stove/range': ['electric_stove'],
-  'Electric transportation': ['ebike', 'electric_vehicle_charger', 'new_electric_vehicle', 'new_plugin_hybrid_vehicle', 'used_electric_vehicle', 'used_plugin_hybrid_vehicle'],
-  'Electrical panel & wiring': ['electric_panel', 'electric_wiring', 'electric_service_upgrades'],
-  'Heating, ventilation & cooling': [
+  'Clothes Dryer': ['heat_pump_clothes_dryer', 'non_heat_pump_clothes_dryer'],
+  'Cooking Stove/Range': ['electric_stove'],
+  'Electric Transportation': ['ebike', 'electric_vehicle_charger', 'new_electric_vehicle', 'new_plugin_hybrid_vehicle', 'used_electric_vehicle', 'used_plugin_hybrid_vehicle'],
+  'Electrical Panel & Wiring': ['electric_panel', 'electric_wiring', 'electric_service_upgrades'],
+  'Heating, Ventilation & Cooling': [
     'air_to_water_heat_pump',
     'central_air_conditioner',
     'ducted_heat_pump',
@@ -17,8 +17,8 @@ export const INCENTIVE_CATEGORIES: Record<string, string[]> = {
     'integrated_heat_pump_controls',
     'other_heat_pump'
   ],
-  'Water heater': ['heat_pump_water_heater', 'non_heat_pump_water_heater', 'solar_water_heater'],
-  'Weatherization & efficiency': [
+  'Water Heater': ['heat_pump_water_heater', 'non_heat_pump_water_heater', 'solar_water_heater'],
+  'Weatherization & Efficiency': [
     'attic_or_roof_insulation',
     'basement_insulation',
     'cool_roof',
@@ -36,7 +36,7 @@ export const INCENTIVE_CATEGORIES: Record<string, string[]> = {
     'efficiency_rebates',
     'energy_audit'
   ],
-  'Battery storage': ['battery_storage_installation'],
+  'Battery Storage': ['battery_storage_installation'],
   'Lawn Care': ['electric_outdoor_equipment'],
   'Solar': ['rooftop_solar_installation']
 };
