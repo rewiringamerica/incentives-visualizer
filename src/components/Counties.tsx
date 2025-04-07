@@ -9,9 +9,7 @@ export interface CountyData {
   description: string;
 }
 
-let isCountySelected = false;
-
-export function loadCounties(
+function loadCounties(
   map: maplibregl.Map,
   onCountySelect?: (data: CountyData) => void,
 ) {
@@ -160,10 +158,9 @@ export function loadCounties(
         description: `Details about ${countyName || 'Unknown County'}...`,
       };
       onCountySelect(countyData);
-      if (!isCountySelected) {
+      setTimeout(() => {
         zoomToCounty(map, feature);
-        isCountySelected = true;
-      }
+      }, 10);
     }
   });
 }
@@ -173,34 +170,13 @@ function zoomToCounty(
   map: maplibregl.Map,
   feature: maplibregl.MapGeoJSONFeature,
 ) {
-  const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+  const centroid = turf.centerOfMass(feature).geometry.coordinates;
 
-  function processCoordinates(coords: number[]) {
-    if (Array.isArray(coords[0])) {
-      coords.forEach(c => processCoordinates(c as unknown as number[]));
-    } else {
-      bounds[0] = Math.min(bounds[0], coords[0]);
-      bounds[1] = Math.min(bounds[1], coords[1]);
-      bounds[2] = Math.max(bounds[2], coords[0]);
-      bounds[3] = Math.max(bounds[3], coords[1]);
-    }
-  }
-
-  if (
-    feature.geometry &&
-    feature.geometry.type !== 'GeometryCollection' &&
-    'coordinates' in feature.geometry
-  ) {
-    processCoordinates(feature.geometry.coordinates as number[]);
-  }
-
-  map.fitBounds(bounds as [number, number, number, number], {
-    padding: 40,
-    maxZoom: 10,
-    duration: 1000,
+  map.flyTo({
+    center: centroid as [number, number],
+    zoom: 8,
+    essential: true,
   });
 }
 
-export function resetCountySelection() {
-  isCountySelected = false;
-}
+export { loadCounties };
