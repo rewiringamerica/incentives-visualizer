@@ -1,3 +1,4 @@
+import * as turf from '@turf/turf';
 import maplibregl from 'maplibre-gl';
 import { STATE_ABBREVIATION_TO_NAME } from '../data/abbrevsToFull';
 import geojsonData from '../data/geojson/states-albers.json';
@@ -199,7 +200,11 @@ function loadStates(
         description: `Details about ${stateName}...`,
       };
       onStateSelect(stateData);
-      zoomToState(map, feature);
+
+      // Delay the flyTo method to ensure the sidebar is visible
+      setTimeout(() => {
+        zoomToState(map, feature);
+      }, 10);
     }
   });
 }
@@ -209,31 +214,12 @@ function zoomToState(
   map: maplibregl.Map,
   feature: maplibregl.MapGeoJSONFeature,
 ) {
-  const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+  const centroid = turf.centerOfMass(feature).geometry.coordinates;
 
-  function processCoordinates(coords) {
-    if (Array.isArray(coords[0])) {
-      coords.map(c => processCoordinates(c));
-    } else {
-      bounds[0] = Math.min(bounds[0], coords[0]);
-      bounds[1] = Math.min(bounds[1], coords[1]);
-      bounds[2] = Math.max(bounds[2], coords[0]);
-      bounds[3] = Math.max(bounds[3], coords[1]);
-    }
-  }
-
-  if (
-    feature.geometry &&
-    feature.geometry.type !== 'GeometryCollection' &&
-    'coordinates' in feature.geometry
-  ) {
-    processCoordinates(feature.geometry.coordinates);
-  }
-
-  map.fitBounds(bounds as [number, number, number, number], {
-    padding: 40,
-    maxZoom: 6,
-    duration: 1000,
+  map.flyTo({
+    center: centroid as [number, number],
+    zoom: 6,
+    essential: true,
   });
 }
 
