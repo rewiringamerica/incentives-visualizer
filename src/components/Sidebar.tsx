@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { STATE_NAME_TO_ABBREVIATION } from '../data/abbrevsToFull';
+import {
+  getAllCategoryNames,
+  getIncentiveCategory,
+} from '../data/incentiveCategories';
 import { mockIncentivesData } from '../mocks/data';
 import { Incentive } from '../mocks/types';
 import { IncentiveCard } from './incentive-card';
@@ -29,11 +33,24 @@ const Sidebar: React.FC<SidebarProps> = props => {
       const filteredIncentives = mockIncentivesData.incentives.filter(
         incentive => stateAbbr && incentive.id.startsWith(stateAbbr + '-'),
       );
-      const optionsSet = new Set<string>();
+
+      // Create a set of available categories for this state
+      const categorySet = new Set<string>();
       filteredIncentives.forEach(incentive => {
-        incentive.items.forEach(item => optionsSet.add(item));
+        incentive.items.forEach(item => {
+          const category = getIncentiveCategory(item);
+          if (category) {
+            categorySet.add(category);
+          }
+        });
       });
-      const options = Array.from(optionsSet);
+
+      // If no categories are found, fall back to all possible categories
+      const options =
+        categorySet.size > 0
+          ? Array.from(categorySet).sort()
+          : getAllCategoryNames();
+
       setFilterOptions(options);
       setSelectedFilters(options);
     } else {
@@ -73,9 +90,12 @@ const Sidebar: React.FC<SidebarProps> = props => {
   const filteredIncentives =
     selectedFilters.length > 0
       ? stateIncentives.filter(incentive =>
-          incentive.items.some(item => selectedFilters.includes(item)),
+          incentive.items.some(item => {
+            const category = getIncentiveCategory(item);
+            return category && selectedFilters.includes(category);
+          }),
         )
-      : []; // Return empty array instead of all state incentives when no filters are selected
+      : [];
 
   return (
     <div className="w-2/5 h-full bg-gray-100 relative overflow-y-auto">
