@@ -1,6 +1,6 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import '../styles/index.css';
 import { CountyData, loadCounties } from './Counties';
 import Legend from './Legend';
@@ -13,13 +13,16 @@ interface MapProps {
 
 const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
-  const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
+
+  const mapRef = useRef<maplibregl.Map | null>(null);
+
   const STYLE_VERSION = 8; // Required for declaring a style, may change in the future
 
   useEffect(() => {
     if (!mapContainer.current) {
       return;
     }
+
     const API_KEY = process.env.MAPTILER_API_KEY;
     const map = new maplibregl.Map({
       container: mapContainer.current,
@@ -37,20 +40,25 @@ const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
       ],
     });
 
+    mapRef.current = map;
+
     map.on('load', () => {
       // Load states and pass the onStateSelect callback so a state click will notify the parent.
       loadCounties(map, onCountySelect);
       loadStates(map, onStateSelect);
-      setMapInstance(map);
     });
 
-    return () => map.remove();
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+      }
+    };
   }, [onStateSelect, onCountySelect]);
 
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
-      <Legend map={mapInstance} />
+      <Legend map={mapRef.current} />
     </div>
   );
 };
