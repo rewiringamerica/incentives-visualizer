@@ -1,6 +1,6 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import '../styles/index.css';
 import { CountyData, loadCounties } from './Counties';
 import Legend from './Legend';
@@ -9,11 +9,17 @@ import { loadStates, StateData } from './States';
 interface MapProps {
   onStateSelect?: (data: StateData) => void;
   onCountySelect?: (data: CountyData) => void;
+  mapInstance: maplibregl.Map | null;
+  onMapSet: React.Dispatch<React.SetStateAction<maplibregl.Map | null>>;
 }
 
-const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
+const Map: React.FC<MapProps> = ({
+  onStateSelect,
+  onCountySelect,
+  mapInstance,
+  onMapSet,
+}) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
-  const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
   const STYLE_VERSION = 8; // Required for declaring a style, may change in the future
 
   useEffect(() => {
@@ -41,11 +47,11 @@ const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
       // Load states and pass the onStateSelect callback so a state click will notify the parent.
       loadCounties(map, onCountySelect);
       loadStates(map, onStateSelect);
-      setMapInstance(map);
+      onMapSet(map);
     });
 
     return () => map.remove();
-  }, [onStateSelect, onCountySelect]);
+  }, [onStateSelect, onCountySelect, onMapSet]);
 
   return (
     <div className="relative w-full h-full">

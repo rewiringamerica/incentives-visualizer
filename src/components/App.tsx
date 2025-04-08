@@ -4,11 +4,12 @@ import { CountyData } from './Counties';
 import Map from './Map';
 import NavBar from './Navbar';
 import Sidebar from './Sidebar';
-import { StateData } from './States';
+import { StateData, zoomToState } from './States';
 
 const App: React.FC = () => {
   const [selectedState, setSelectedState] = useState<StateData | null>(null);
   const [selectedCounty, setSelectedCounty] = useState<CountyData | null>(null);
+  const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
 
   const handleStateSelect = useCallback((data: StateData) => {
     setSelectedState(data);
@@ -25,9 +26,17 @@ const App: React.FC = () => {
     setSelectedCounty(null);
   }, []);
 
+  const handleSetMapInstance = useCallback((map: maplibregl.Map) => {
+    setMapInstance(map);
+  }, []);
+
   return (
     <div>
-      <NavBar />
+      <NavBar
+        map={mapInstance}
+        zoomToState={zoomToState}
+        onStateSelect={handleStateSelect}
+      />
       <div className="flex h-[calc(100vh-64px)]">
         <Sidebar
           stateData={selectedState}
@@ -38,6 +47,8 @@ const App: React.FC = () => {
           <Map
             onStateSelect={handleStateSelect}
             onCountySelect={handleCountySelect}
+            mapInstance={mapInstance}
+            onMapSet={handleSetMapInstance}
           />
         </div>
       </div>

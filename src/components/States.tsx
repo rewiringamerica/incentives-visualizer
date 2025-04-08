@@ -223,4 +223,4 @@ function zoomToState(
   });
 }
 
-export { loadStates };
+export { loadStates, zoomToState };
