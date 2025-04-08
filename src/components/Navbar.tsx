@@ -93,10 +93,11 @@ const Navbar: React.FC<NavbarProps> = ({ map, zoomToState, onStateSelect }) => {
       </div>
       {/* Language dropdown */}
       <div className="absolute right-4 flex-shrink-0">
-        <select className="bg-[#eed87e] h-8 rounded focus:outline-none border-0">
-          <option value="EN" selected>
-            EN
-          </option>
+        <select
+          className="bg-[#eed87e] h-8 rounded focus:outline-none border-0"
+          defaultValue="EN"
+        >
+          <option value="EN">EN</option>
           <option value="ES">ES</option>
         </select>
       </div>
