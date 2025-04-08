@@ -107,14 +107,9 @@ function loadStates(
       ['in', 'ste_name', ...noCoverageStates],
     ],
     paint: {
-      'fill-color': '#6E33CF',
+      'fill-color': '#8F8F8F',
       'fill-outline-color': '#1E1E1E',
-      'fill-opacity': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        1,
-        0.5,
-      ],
+      'fill-opacity': 1,
     },
   });
 
@@ -193,6 +188,16 @@ function loadStates(
   // On click, call the passed callback to select a state
   map.on('click', 'states-layer', e => {
     if (e.features && e.features.length > 0 && onStateSelect) {
+      // check if clicked state is uncovered
+      const clickedState = e.features[0].properties.ste_name;
+      const isUncovered = noCoverageStates.includes(clickedState);
+
+      // If the clicked state is uncovered, do not select it
+      if (isUncovered) {
+        return;
+      }
+
+      // If the clicked state is covered, select it
       const feature = e.features[0];
       const stateName = feature.properties.ste_name;
 
