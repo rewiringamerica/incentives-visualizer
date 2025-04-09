@@ -35,7 +35,9 @@ const App: React.FC = () => {
       <NavBar
         map={mapInstance}
         zoomToState={zoomToState}
+        zoomToCounty={zoomToState}
         onStateSelect={handleStateSelect}
+        onCountySelect={handleCountySelect}
       />
       <div className="flex h-[calc(100vh-64px)]">
         <Sidebar
