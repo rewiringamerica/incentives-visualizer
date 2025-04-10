@@ -49,6 +49,8 @@ const App: React.FC = () => {
             onCountySelect={handleCountySelect}
             mapInstance={mapInstance}
             onMapSet={handleSetMapInstance}
+            selectedState={selectedState}
+            selectedCounty={selectedCounty}
           />
         </div>
       </div>
