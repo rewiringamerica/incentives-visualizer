@@ -72,39 +72,78 @@ class CustomLegendControl {
       return;
     }
 
-    this._container.innerHTML = `
-      <strong>Legend</strong>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 2vh;">
-        <span style="
-          width: 20px; height: 20px; 
-          background: ${fillColorCoverage}; 
-          opacity: ${fillOpacityCoverage};
-          border: 2px solid ${outlineColor || 'black'}; 
-          margin-right: 5px; display: inline-block;">
-        </span>
-        <span>Supported</span>
-      </div>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
-        <span style="
-          width: 20px; height: 20px; 
-          background: ${fillColorBeta}; 
-          opacity: ${fillOpacityBeta};
-          border: 2px solid ${outlineColor || 'black'}; 
-          margin-right: 5px; display: inline-block;">
-        </span>
-        <span>Coming Soon</span>
-      </div>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
-        <span style="
-          width: 20px; height: 20px; 
-          background: ${fillColorNoCoverage}; 
-          opacity: ${fillOpacityNoCoverage};
-          border: 2px solid ${outlineColor || 'black'}; 
-          margin-right: 5px; display: inline-block;">
-        </span>
-        <span>Not Supported</span>
-      </div>
-    `;
+    // if at county zoom level, show different legend
+    const zoom = this._map.getZoom();
+    const isCountyZoom = zoom >= 6;
+    if (isCountyZoom) {
+      this._container.innerHTML = `
+        <strong>Legend</strong>
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 2vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorCoverage}; 
+            opacity: ${fillOpacityCoverage};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>20+ Incentives</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorBeta}; 
+            opacity: ${fillOpacityBeta};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>10-19 Incentives</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorNoCoverage}; 
+            opacity: ${fillOpacityNoCoverage};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>1-9 Incentives</span>
+        </div>
+        `;
+    } else {
+      this._container.innerHTML = `
+        <strong>Legend</strong>
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 2vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorCoverage}; 
+            opacity: ${fillOpacityCoverage};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>Supported</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorBeta}; 
+            opacity: ${fillOpacityBeta};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>Coming Soon</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorNoCoverage}; 
+            opacity: ${fillOpacityNoCoverage};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>Not Supported</span>
+        </div>
+        `;
+    }
   }
 }
 
