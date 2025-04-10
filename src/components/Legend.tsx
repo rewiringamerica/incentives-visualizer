@@ -75,75 +75,53 @@ class CustomLegendControl {
     // if at county zoom level, show different legend
     const zoom = this._map.getZoom();
     const isCountyZoom = zoom >= 6;
+
+    // if on state view, show state labels
+    let label1 = 'Supported';
+    let label2 = 'Coming Soon';
+    let label3 = 'Not Supported';
+
+    // if on county view, show county labels
     if (isCountyZoom) {
-      this._container.innerHTML = `
-        <strong>Legend</strong>
-        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 2vh;">
-          <span style="
-            width: 20px; height: 20px; 
-            background: ${fillColorCoverage}; 
-            opacity: ${fillOpacityCoverage};
-            border: 2px solid ${outlineColor || 'black'}; 
-            margin-right: 5px; display: inline-block;">
-          </span>
-          <span>20+ Incentives</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
-          <span style="
-            width: 20px; height: 20px; 
-            background: ${fillColorBeta}; 
-            opacity: ${fillOpacityBeta};
-            border: 2px solid ${outlineColor || 'black'}; 
-            margin-right: 5px; display: inline-block;">
-          </span>
-          <span>10-19 Incentives</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
-          <span style="
-            width: 20px; height: 20px; 
-            background: ${fillColorNoCoverage}; 
-            opacity: ${fillOpacityNoCoverage};
-            border: 2px solid ${outlineColor || 'black'}; 
-            margin-right: 5px; display: inline-block;">
-          </span>
-          <span>1-9 Incentives</span>
-        </div>
-        `;
-    } else {
-      this._container.innerHTML = `
-        <strong>Legend</strong>
-        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 2vh;">
-          <span style="
-            width: 20px; height: 20px; 
-            background: ${fillColorCoverage}; 
-            opacity: ${fillOpacityCoverage};
-            border: 2px solid ${outlineColor || 'black'}; 
-            margin-right: 5px; display: inline-block;">
-          </span>
-          <span>Supported</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
-          <span style="
-            width: 20px; height: 20px; 
-            background: ${fillColorBeta}; 
-            opacity: ${fillOpacityBeta};
-            border: 2px solid ${outlineColor || 'black'}; 
-            margin-right: 5px; display: inline-block;">
-          </span>
-          <span>Coming Soon</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
-          <span style="
-            width: 20px; height: 20px; 
-            background: ${fillColorNoCoverage}; 
-            opacity: ${fillOpacityNoCoverage};
-            border: 2px solid ${outlineColor || 'black'}; 
-            margin-right: 5px; display: inline-block;">
-          </span>
-          <span>Not Supported</span>
-        </div>
-        `;
+      // numbers are arbitrary, can be changed later
+      label1 = '20+ Incentives';
+      label2 = '10-19 Incentives';
+      label3 = '1-9 Incentives';
     }
+
+    this._container.innerHTML = `
+      <strong>Legend</strong>
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+        <span style="
+          width: 20px; height: 20px; 
+          background: ${fillColorCoverage}; 
+          opacity: ${fillOpacityCoverage};
+          border: 2px solid ${outlineColor || 'black'}; 
+          margin-right: 5px; display: inline-block;">
+        </span>
+        <span>${label1}</span>
+      </div>
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+        <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorBeta}; 
+            opacity: ${fillOpacityBeta};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>${label2}</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorNoCoverage}; 
+            opacity: ${fillOpacityNoCoverage};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>${label3}</span>
+        </div>
+        `;
   }
 }
 
