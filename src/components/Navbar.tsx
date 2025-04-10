@@ -1,8 +1,9 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import logo from '../assets/logo.png';
-import geojsonData from '../data/geojson/states-albers.json';
-import { US_STATE_NAMES } from '../data/states';
+import countyGeojson from '../data/geojson/counties-albers.json';
+import stateGeojson from '../data/geojson/states-albers.json';
+import { CountyData } from './Counties';
 import { StateData } from './States';
 
 interface NavbarProps {
@@ -11,11 +12,81 @@ interface NavbarProps {
     map: maplibregl.Map,
     feature: maplibregl.MapGeoJSONFeature,
   ) => void;
+  zoomToCounty: (
+    map: maplibregl.Map,
+    feature: maplibregl.MapGeoJSONFeature,
+  ) => void;
   onStateSelect: (data: StateData) => void;
+  onCountySelect: (data: CountyData) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ map, zoomToState, onStateSelect }) => {
+type SearchOption = {
+  label: string;
+  type: 'state' | 'county';
+  feature?: maplibregl.MapGeoJSONFeature;
+  data: StateData | CountyData;
+};
+
+const Navbar: React.FC<NavbarProps> = ({
+  map,
+  zoomToState,
+  zoomToCounty,
+  onStateSelect,
+  onCountySelect,
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
+
+  const countiesFiltered = countyGeojson.features.filter(feature => {
+    const coty_type = feature.properties?.coty_type;
+    return coty_type && coty_type === 'county';
+  });
+
+  const statesFiltered = stateGeojson.features.filter(feature => {
+    const ste_type = feature.properties?.ste_type;
+    return ste_type && ste_type === 'state';
+  });
+
+  const searchOptions: SearchOption[] = [
+    ...statesFiltered.map(feature => {
+      const stateName = Array.isArray(feature.properties?.ste_name)
+        ? feature.properties.ste_name[0]
+        : feature.properties?.ste_name;
+
+      let stateDisplayName = stateName;
+      if (stateName === 'District of Columbia') {
+        stateDisplayName = 'Washington, D.C.';
+      }
+
+      return {
+        label: stateDisplayName,
+        type: 'state',
+        feature,
+        data: {
+          name: stateDisplayName || 'Unknown State',
+          description: `Details about ${stateDisplayName}...`,
+        } as StateData,
+      };
+    }),
+    ...countiesFiltered.map(feature => {
+      const countyName = Array.isArray(feature.properties?.coty_name)
+        ? feature.properties.coty_name[0]
+        : feature.properties?.coty_name;
+
+      const stateName = Array.isArray(feature.properties?.ste_name)
+        ? feature.properties.ste_name[0]
+        : feature.properties?.ste_name;
+
+      return {
+        label: `${countyName}, ${stateName}`,
+        type: 'county',
+        feature,
+        data: {
+          name: countyName || 'Unknown County',
+          description: `Details about ${countyName}...`,
+        } as CountyData,
+      };
+    }),
+  ];
 
   const handleSearchChange = (
     event: React.SyntheticEvent<Element, Event>,
@@ -26,28 +97,27 @@ const Navbar: React.FC<NavbarProps> = ({ map, zoomToState, onStateSelect }) => {
 
   const handleSubmit = () => {
     if (searchTerm.trim()) {
-      const stateName = searchTerm.trim();
+      const searchValue = searchTerm.trim();
 
-      const feature = geojsonData.features.find(f => {
-        const steNameRaw = f.properties?.ste_name;
-        // Since steName is in form ['name'], we need to parse it
-        const steName = Array.isArray(steNameRaw)
-          ? steNameRaw[0]
-          : steNameRaw?.replace(/^\['|'\]$/g, '');
+      const searchOption = searchOptions.find(
+        option => option.label === searchValue,
+      );
+      if (!searchOption) {
+        console.error(`State/county "${searchValue}" not found.`);
+        return;
+      }
 
-        return steName === stateName;
-      });
+      const feature = searchOption.feature;
+      const data = searchOption.data;
 
-      const stateData: StateData = {
-        name: stateName,
-        description: `Details about ${stateName}...`,
-      };
-      onStateSelect(stateData);
-
-      if (feature) {
+      if (feature && searchOption.type === 'state') {
+        onStateSelect(data);
         zoomToState(map, feature);
+      } else if (feature && searchOption.type === 'county') {
+        onCountySelect(data);
+        zoomToCounty(map, feature);
       } else {
-        console.error(`State "${searchTerm}" not found.`);
+        console.error(`State/county "${searchTerm}" not found.`);
       }
     }
   };
@@ -70,7 +140,7 @@ const Navbar: React.FC<NavbarProps> = ({ map, zoomToState, onStateSelect }) => {
         style={{ maxWidth: '400px', width: '100%' }}
       >
         <Autocomplete
-          options={US_STATE_NAMES}
+          options={searchOptions}
           inputValue={searchTerm}
           onInputChange={(event, value) => handleSearchChange(event, value)}
           disableClearable
