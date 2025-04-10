@@ -82,7 +82,7 @@ class CustomLegendControl {
           border: 2px solid ${outlineColor || 'black'}; 
           margin-right: 5px; display: inline-block;">
         </span>
-        <span>Covered States</span>
+        <span>Supported</span>
       </div>
       <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
         <span style="
@@ -92,7 +92,7 @@ class CustomLegendControl {
           border: 2px solid ${outlineColor || 'black'}; 
           margin-right: 5px; display: inline-block;">
         </span>
-        <span>Beta States</span>
+        <span>Coming Soon</span>
       </div>
       <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
         <span style="
@@ -102,7 +102,7 @@ class CustomLegendControl {
           border: 2px solid ${outlineColor || 'black'}; 
           margin-right: 5px; display: inline-block;">
         </span>
-        <span>Uncovered States</span>
+        <span>Not Supported</span>
       </div>
     `;
   }
