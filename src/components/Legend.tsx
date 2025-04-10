@@ -74,7 +74,7 @@ class CustomLegendControl {
 
     this._container.innerHTML = `
       <strong>Legend</strong>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 2vh;">
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
         <span style="
           width: 20px; height: 20px; 
           background: ${fillColorCoverage}; 
