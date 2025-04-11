@@ -10,26 +10,20 @@ import { IncentiveCard } from './incentive-card';
 import IncentivesFilter from './IncentivesFilter';
 
 interface SidebarProps {
-  stateData?: {
-    name: string;
-    description: string;
-  };
-  countyData?: {
-    name: string;
-    description: string;
-  };
+  selectedFeature: maplibregl.MapGeoJSONFeature | null;
   onClose?: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = props => {
-  const { stateData, countyData, onClose } = props;
+  const { selectedFeature, onClose } = props;
   const [isVisible, setIsVisible] = useState(false);
   const [filterOptions, setFilterOptions] = useState<string[]>([]);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   useEffect(() => {
-    if (stateData) {
-      const stateAbbr = STATE_NAME_TO_ABBREVIATION[stateData.name] || '';
+    if (selectedFeature?.properties?.ste_type) {
+      const stateName = selectedFeature.properties.ste_name;
+      const stateAbbr = STATE_NAME_TO_ABBREVIATION[stateName] || '';
       const filteredIncentives = mockIncentivesData.incentives.filter(
         incentive => stateAbbr && incentive.id.startsWith(stateAbbr + '-'),
       );
@@ -57,11 +51,11 @@ const Sidebar: React.FC<SidebarProps> = props => {
       setFilterOptions([]);
       setSelectedFilters([]);
     }
-  }, [stateData]);
+  }, [selectedFeature]);
 
   useEffect(() => {
-    setIsVisible(!!stateData || !!countyData);
-  }, [stateData, countyData]);
+    setIsVisible(!!selectedFeature);
+  }, [selectedFeature]);
 
   const handleFilterChange = (selected: string[]) => {
     setSelectedFilters(selected);
@@ -78,10 +72,12 @@ const Sidebar: React.FC<SidebarProps> = props => {
     return null;
   }
 
-  const stateAbbr = stateData
-    ? STATE_NAME_TO_ABBREVIATION[stateData.name] || ''
-    : '';
-  const stateIncentives = stateData
+  const isState = selectedFeature?.properties?.ste_type;
+  const name = isState
+    ? selectedFeature.properties.ste_name
+    : selectedFeature?.properties?.coty_name;
+  const stateAbbr = isState ? STATE_NAME_TO_ABBREVIATION[name] || '' : '';
+  const stateIncentives = isState
     ? mockIncentivesData.incentives.filter(
         incentive => stateAbbr && incentive.id.startsWith(stateAbbr + '-'),
       )
@@ -121,7 +117,7 @@ const Sidebar: React.FC<SidebarProps> = props => {
       </button>
 
       <div className="pt-12 px-3 pb-4">
-        {stateData && (
+        {name && (
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Filter by incentive type
@@ -139,10 +135,10 @@ const Sidebar: React.FC<SidebarProps> = props => {
           </div>
         )}
 
-        {stateData ? (
+        {name ? (
           <div>
-            <h2 className="text-xl font-bold mb-2">{stateData.name}</h2>
-            <p>{stateData.description}</p>
+            <h2 className="text-xl font-bold mb-2">{name}</h2>
+            <p>Details about {name}...</p>
             <div className="mt-4 space-y-4">
               {filteredIncentives.length > 0 ? (
                 filteredIncentives.map((incentive: Incentive) => (
@@ -163,26 +159,6 @@ const Sidebar: React.FC<SidebarProps> = props => {
                   No incentives match the selected filters.
                 </p>
               )}
-            </div>
-          </div>
-        ) : countyData ? (
-          <div>
-            <h2 className="text-xl font-bold mb-2">{countyData.name}</h2>
-            <p>{countyData.description}</p>
-            <div className="mt-4 space-y-4">
-              {filteredIncentives.map((incentive: Incentive) => (
-                <IncentiveCard
-                  key={incentive.id}
-                  typeChips={incentive.payment_methods}
-                  headline={incentive.program}
-                  subHeadline={incentive.eligible_geo_group || ''}
-                  body={incentive.short_description.en}
-                  warningChip={
-                    incentive.low_income ? 'Low Income Eligible' : null
-                  }
-                  buttonUrl={incentive.more_info_url?.en || null}
-                />
-              ))}
             </div>
           </div>
         ) : (

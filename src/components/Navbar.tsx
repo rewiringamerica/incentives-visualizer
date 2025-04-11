@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import logo from '../assets/logo.png';
 import geojsonData from '../data/geojson/states-albers.json';
 import { US_STATE_NAMES } from '../data/states';
-import { StateData } from './States';
 
 interface NavbarProps {
   map: maplibregl.Map;
@@ -11,10 +10,14 @@ interface NavbarProps {
     map: maplibregl.Map,
     feature: maplibregl.MapGeoJSONFeature,
   ) => void;
-  onStateSelect: (data: StateData) => void;
+  onFeatureSelect: (feature: maplibregl.MapGeoJSONFeature) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ map, zoomToState, onStateSelect }) => {
+const Navbar: React.FC<NavbarProps> = ({
+  map,
+  zoomToState,
+  onFeatureSelect,
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearchChange = (
@@ -38,14 +41,9 @@ const Navbar: React.FC<NavbarProps> = ({ map, zoomToState, onStateSelect }) => {
         return steName === stateName;
       });
 
-      const stateData: StateData = {
-        name: stateName,
-        description: `Details about ${stateName}...`,
-      };
-      onStateSelect(stateData);
-
       if (feature) {
-        zoomToState(map, feature);
+        onFeatureSelect(feature as maplibregl.MapGeoJSONFeature);
+        zoomToState(map, feature as maplibregl.MapGeoJSONFeature);
       } else {
         console.error(`State "${searchTerm}" not found.`);
       }
