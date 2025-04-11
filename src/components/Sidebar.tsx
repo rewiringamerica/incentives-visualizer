@@ -10,7 +10,7 @@ import { IncentiveCard } from './incentive-card';
 import IncentivesFilter from './IncentivesFilter';
 
 interface SidebarProps {
-  selectedFeature: maplibregl.MapGeoJSONFeature | null;
+  selectedFeature?: maplibregl.MapGeoJSONFeature | null;
   onClose?: () => void;
 }
 
@@ -138,7 +138,7 @@ const Sidebar: React.FC<SidebarProps> = props => {
         {name ? (
           <div>
             <h2 className="text-xl font-bold mb-2">{name}</h2>
-            <p>Details about {name}...</p>
+            <p>Details about {name}</p>
             <div className="mt-4 space-y-4">
               {filteredIncentives.length > 0 ? (
                 filteredIncentives.map((incentive: Incentive) => (
