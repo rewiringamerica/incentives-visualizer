@@ -36,11 +36,28 @@ import { OwnerStatus, PaymentMethod } from '../src/mocks/types';
 
 describe('Sidebar Component', () => {
   const mockStateData = {
-    name: 'California',
-    description: 'Details about California',
-  };
+    type: 'Feature',
+    properties: {
+      geo_point_2d: {
+        lon: -119.61060994717245,
+        lat: 37.246338610069266
+      },
+      year: "2023",
+      ste_code: ["06"],
+      ste_name: ["California"],
+      ste_area_code: "USA",
+      ste_type: "state",
+      ste_name_long: null,
+      ste_fp_code: null,
+      ste_gnis_code: "01779778"
+    },
+    geometry: null,
+    _geometry: null,
+    id: 0,
+    _vectorTileFeature: null,
+    toJSON: () => ({})
+  } as unknown as maplibregl.MapGeoJSONFeature;
 
-  const mockOnChipSelectionChange = vi.fn();
   const mockOnClose = vi.fn();
 
   beforeEach(() => {
@@ -55,20 +72,20 @@ describe('Sidebar Component', () => {
   });
 
   test('renders the sidebar when stateData is provided', () => {
-    render(<Sidebar stateData={mockStateData} />);
+    render(<Sidebar selectedFeature={mockStateData} />);
     expect(screen.getByText('California')).toBeInTheDocument();
     expect(screen.getByText('Details about California')).toBeInTheDocument();
   });
 
   test('calls onClose when the close button is clicked', () => {
-    render(<Sidebar stateData={mockStateData} onClose={mockOnClose} />);
+    render(<Sidebar selectedFeature={mockStateData} onClose={mockOnClose} />);
     const closeButton = screen.getByRole('button', { name: /close sidebar/i });
     fireEvent.click(closeButton);
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  test('renders incentives when stateData is provided', () => {
-    render(<Sidebar stateData={mockStateData} />);
+  test('renders incentives when feature is provided', () => {
+    render(<Sidebar selectedFeature={mockStateData} />);
     // Use getAllByText instead of getByText to allow multiple occurrences
     const programElements = screen.getAllByText('ca_CaliforniaEnergySmartHomes');
     // Check that at least one instance exists

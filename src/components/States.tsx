@@ -5,19 +5,16 @@ import geojsonData from '../data/geojson/states-albers.json';
 import { BETA_STATES, LAUNCHED_STATES, STATES_PLUS_DC } from '../data/states';
 import { addLabels } from './MapLabels';
 
-export interface StateData {
-  name: string;
-  description: string;
-}
-
 function loadStates(
   map: maplibregl.Map,
-  onStateSelect?: (data: StateData) => void,
+  onStateSelect?: (feature: maplibregl.MapGeoJSONFeature) => void,
 ) {
-  geojsonData.features.forEach(feature => {
-    const name = feature.properties?.ste_name;
-    if (Array.isArray(name)) {
-      feature.properties.ste_name = name[0];
+  (geojsonData as GeoJSON.FeatureCollection).features.forEach(feature => {
+    if (feature.properties) {
+      const name = feature.properties.ste_name;
+      if (Array.isArray(name)) {
+        feature.properties.ste_name = name[0];
+      }
     }
   });
 
@@ -193,15 +190,7 @@ function loadStates(
   map.on('click', 'states-layer', e => {
     if (e.features && e.features.length > 0 && onStateSelect) {
       const feature = e.features[0];
-      const stateName = feature.properties.ste_name;
-
-      const stateData: StateData = {
-        name: stateName,
-        description: `Details about ${stateName}...`,
-      };
-      onStateSelect(stateData);
-
-      // Delay the flyTo method to ensure the sidebar is visible
+      onStateSelect(feature);
       setTimeout(() => {
         zoomToState(map, feature);
       }, 10);
