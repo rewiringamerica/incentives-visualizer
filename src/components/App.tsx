@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { CountyData } from './Counties';
+import { CountyData, zoomToCounty } from './Counties';
 import Map from './Map';
 import NavBar from './Navbar';
 import Sidebar from './Sidebar';
@@ -35,7 +35,7 @@ const App: React.FC = () => {
       <NavBar
         map={mapInstance}
         zoomToState={zoomToState}
-        zoomToCounty={zoomToState}
+        zoomToCounty={zoomToCounty}
         onStateSelect={handleStateSelect}
         onCountySelect={handleCountySelect}
       />
