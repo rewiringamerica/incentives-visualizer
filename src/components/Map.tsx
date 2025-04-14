@@ -15,7 +15,7 @@ interface MapProps {
 const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const STYLE_VERSION = 8; // Required for declaring a style, may change in the future
 
   useEffect(() => {
@@ -59,7 +59,7 @@ const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       <Toggle map={mapInstance} isVisible={isVisible} onToggle={setIsVisible} />
-      <Legend map={mapInstance} />
+      <Legend map={mapInstance} isVisible={isVisible} />
     </div>
   );
 };
