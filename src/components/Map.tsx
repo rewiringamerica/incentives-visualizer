@@ -4,7 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import '../styles/index.css';
 import { CountyData, loadCounties } from './Counties';
 import Legend from './Legend';
-import { loadStates, StateData } from './States';
+import { loadStates, StateData, updateStatesVisibility } from './States';
+import Toggle from './Toggle';
 
 interface MapProps {
   onStateSelect?: (data: StateData) => void;
@@ -14,6 +15,7 @@ interface MapProps {
 const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const STYLE_VERSION = 8; // Required for declaring a style, may change in the future
 
   useEffect(() => {
@@ -40,17 +42,24 @@ const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
     map.on('load', () => {
       // Load states and pass the onStateSelect callback so a state click will notify the parent.
       loadCounties(map, onCountySelect);
-      loadStates(map, onStateSelect);
+      loadStates(map, onStateSelect, isVisible);
       setMapInstance(map);
     });
 
     return () => map.remove();
   }, [onStateSelect, onCountySelect]);
 
+  useEffect(() => {
+    if (mapInstance) {
+      updateStatesVisibility(mapInstance, isVisible);
+    }
+  }, [mapInstance, isVisible]);
+
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
-      <Legend map={mapInstance} />
+      <Toggle map={mapInstance} isVisible={isVisible} onToggle={setIsVisible} />
+      <Legend map={mapInstance} isVisible={isVisible} />
     </div>
   );
 };

@@ -84,6 +84,9 @@ function loadStates(
         0.5,
       ],
     },
+    layout: {
+      visibility: 'none',
+    },
   });
 
   // Find states that have no coverage
@@ -110,6 +113,9 @@ function loadStates(
       'fill-color': '#8F8F8F',
       'fill-outline-color': '#1E1E1E',
       'fill-opacity': 1,
+    },
+    layout: {
+      visibility: 'visible',
     },
   });
 
@@ -138,7 +144,12 @@ function loadStates(
         0.5,
       ],
     },
+    layout: {
+      visibility: 'none',
+    },
   });
+
+  // TODO: Add layers for incentive numbers on top.
 
   // Add labels for states
   addLabels(map, geojsonData);
@@ -247,8 +258,25 @@ function zoomToState(
   });
 }
 
+function updateStatesVisibility(map: maplibregl.Map, visible: boolean) {
+  // exclude no coverage, because we don't show
+  // TODO: add layers for incentives
+  const layerIds = [
+    'states-coverage-layer',
+    'states-beta-layer',
+  ];
+  const visibility = visible ? 'visible' : 'none';
+
+  layerIds.forEach(id => {
+    if (!map.getLayer(id)) {
+      return;
+    }
+    map.setLayoutProperty(id, 'visibility', visibility);
+  });
+}
+
 function resetStateSelection() {
   isStateSelected = false;
 }
 
-export { loadStates, resetStateSelection };
+export { loadStates, resetStateSelection, updateStatesVisibility };

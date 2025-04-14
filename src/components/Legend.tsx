@@ -1,9 +1,15 @@
 import maplibregl from 'maplibre-gl';
 import { useEffect } from 'react';
 
+interface LegendProps {
+  map: maplibregl.Map | null;
+  isVisible: boolean;
+}
+
 class CustomLegendControl {
   _map: maplibregl.Map | null = null;
   _container: HTMLDivElement | null = null;
+  _isVisible: boolean | null = null;
 
   onAdd(map: maplibregl.Map) {
     this._map = map;
@@ -28,6 +34,11 @@ class CustomLegendControl {
       this._container.parentNode.removeChild(this._container);
     }
     this._map = null;
+  }
+
+  setVisibleState(state: boolean) {
+    this._isVisible = state;
+    this.updateLegend(); // Update when state changes
   }
 
   updateLegend() {
@@ -72,6 +83,32 @@ class CustomLegendControl {
       return;
     }
 
+    // if at county zoom level, show different legend
+    const zoom = this._map.getZoom();
+    const isCountyZoom = zoom >= 6;
+
+    // if on state view, show state labels
+    // check if the map is toggled to incentive or coverage view
+    let label1 = '';
+    let label2 = '';
+    let label3 = '';
+
+    // if on county view, show county labels
+    if (isCountyZoom) {
+      // numbers are arbitrary, can be changed later
+      label1 = '20+ Incentives';
+      label2 = '10-19 Incentives';
+      label3 = '1-9 Incentives';
+    } else if (this._isVisible) {
+      label1 = 'Supported';
+      label2 = 'Coming Soon';
+      label3 = 'Not Supported';
+    } else {
+      label1 = '10-20 Incentives';
+      label2 = '1-9 Incentives';
+      label3 = 'No Incentives';
+    }
+
     this._container.innerHTML = `
       <strong>Legend</strong>
       <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
@@ -82,34 +119,33 @@ class CustomLegendControl {
           border: 2px solid ${outlineColor || 'black'}; 
           margin-right: 5px; display: inline-block;">
         </span>
+        <span>${label1}</span>
       </div>
       <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
         <span style="
-          width: 20px; height: 20px; 
-          background: ${fillColorBeta}; 
-          opacity: ${fillOpacityBeta};
-          border: 2px solid ${outlineColor || 'black'}; 
-          margin-right: 5px; display: inline-block;">
-        </span>
-      </div>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
-        <span style="
-          width: 20px; height: 20px; 
-          background: ${fillColorNoCoverage}; 
-          opacity: ${fillOpacityNoCoverage};
-          border: 2px solid ${outlineColor || 'black'}; 
-          margin-right: 5px; display: inline-block;">
-        </span>
-      </div>
-    `;
+            width: 20px; height: 20px; 
+            background: ${fillColorBeta}; 
+            opacity: ${fillOpacityBeta};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>${label2}</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorNoCoverage}; 
+            opacity: ${fillOpacityNoCoverage};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;">
+          </span>
+          <span>${label3}</span>
+        </div>
+        `;
   }
 }
 
-interface LegendProps {
-  map: maplibregl.Map | null;
-}
-
-const Legend: React.FC<LegendProps> = ({ map }) => {
+const Legend: React.FC<LegendProps> = ({ map, isVisible }) => {
   useEffect(() => {
     if (!map) {
       return;
@@ -122,11 +158,15 @@ const Legend: React.FC<LegendProps> = ({ map }) => {
     map.on('styledata', update);
     map.on('sourcedata', update);
 
+    if (legendControl) {
+      legendControl.setVisibleState(isVisible);
+    }
+
     return () => {
       map.off('styledata', update);
       map.removeControl(legendControl);
     };
-  }, [map]);
+  }, [isVisible, map]);
 
   return null;
 };
