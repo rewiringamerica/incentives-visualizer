@@ -242,8 +242,24 @@ function zoomToState(
   });
 }
 
+function updateStatesVisibility(map: maplibregl.Map, visible: boolean) {
+  const layerIds = [
+    'states-coverage-layer',
+    'states-no-coverage-layer',
+    'states-beta-layer',
+  ];
+  const visibility = visible ? 'visible' : 'none';
+
+  layerIds.forEach(id => {
+    if (!map.getLayer(id)) {
+      return;
+    }
+    map.setLayoutProperty(id, 'visibility', visibility);
+  });
+}
+
 function resetStateSelection() {
   isStateSelected = false;
 }
 
-export { loadStates, resetStateSelection };
+export { loadStates, resetStateSelection, updateStatesVisibility };

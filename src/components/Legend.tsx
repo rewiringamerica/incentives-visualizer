@@ -74,7 +74,7 @@ class CustomLegendControl {
 
     this._container.innerHTML = `
       <strong>Legend</strong>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 2vh;">
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 115px; margin-bottom: 1vh;">
         <span style="
           width: 20px; height: 20px; 
           background: ${fillColorCoverage}; 
@@ -84,7 +84,7 @@ class CustomLegendControl {
         </span>
         <span>Covered States</span>
       </div>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 115px; margin-bottom: 1vh;">
         <span style="
           width: 20px; height: 20px; 
           background: ${fillColorBeta}; 
@@ -94,7 +94,7 @@ class CustomLegendControl {
         </span>
         <span>Beta States</span>
       </div>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 115px; margin-bottom: 0.5vh;">
         <span style="
           width: 20px; height: 20px; 
           background: ${fillColorNoCoverage}; 
