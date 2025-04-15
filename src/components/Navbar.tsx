@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 import logo from '../assets/logo.png';
 import countyGeojson from '../data/geojson/counties-albers.json';
 import stateGeojson from '../data/geojson/states-albers.json';
-import { CountyData } from './Counties';
-import { StateData } from './States';
 
 interface NavbarProps {
   map: maplibregl.Map;
@@ -16,15 +14,14 @@ interface NavbarProps {
     map: maplibregl.Map,
     feature: maplibregl.MapGeoJSONFeature,
   ) => void;
-  onStateSelect: (data: StateData) => void;
-  onCountySelect: (data: CountyData) => void;
+  onStateSelect: (feature: maplibregl.MapGeoJSONFeature) => void;
+  onCountySelect: (feature: maplibregl.MapGeoJSONFeature) => void;
 }
 
 type SearchOption = {
   label: string;
   type: 'state' | 'county';
   feature?: maplibregl.MapGeoJSONFeature;
-  data: StateData | CountyData;
 };
 
 const Navbar: React.FC<NavbarProps> = ({
@@ -61,10 +58,6 @@ const Navbar: React.FC<NavbarProps> = ({
         label: stateDisplayName,
         type: 'state',
         feature,
-        data: {
-          name: stateDisplayName || 'Unknown State',
-          description: `Details about ${stateDisplayName}...`,
-        } as StateData,
       };
     }),
     ...countiesFiltered.map(feature => {
@@ -80,10 +73,6 @@ const Navbar: React.FC<NavbarProps> = ({
         label: `${countyName}, ${stateName}`,
         type: 'county',
         feature,
-        data: {
-          name: countyName || 'Unknown County',
-          description: `Details about ${countyName}...`,
-        } as CountyData,
       };
     }),
   ];
@@ -108,13 +97,12 @@ const Navbar: React.FC<NavbarProps> = ({
       }
 
       const feature = searchOption.feature;
-      const data = searchOption.data;
 
       if (feature && searchOption.type === 'state') {
-        onStateSelect(data);
+        onStateSelect(feature);
         zoomToState(map, feature);
       } else if (feature && searchOption.type === 'county') {
-        onCountySelect(data);
+        onCountySelect(feature);
         zoomToCounty(map, feature);
       } else {
         console.error(`State/county "${searchTerm}" not found.`);
