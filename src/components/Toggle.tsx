@@ -38,7 +38,6 @@ const Toggle: React.FC<ToggleProps> = ({ isVisible, onToggle }) => {
           transition: 'background-color 0.3s ease',
         }}
       >
-        {/* Labels */}
         <div
           style={{
             flex: 1,
