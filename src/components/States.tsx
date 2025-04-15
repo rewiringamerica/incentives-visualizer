@@ -220,14 +220,13 @@ function zoomToState(
   feature: maplibregl.MapGeoJSONFeature,
 ) {
   const centroid = turf.centerOfMass(feature).geometry.coordinates;
-    
+
   map.flyTo({
     center: centroid as [number, number],
     zoom: 6,
     essential: true,
   });
 }
-
 
 function updateStatesVisibility(map: maplibregl.Map, visible: boolean) {
   // exclude no coverage, because we don't show
@@ -250,4 +249,4 @@ function resetStateSelection() {
   isStateSelected = false;
 }
 
-export { loadStates, resetStateSelection, updateStatesVisibility };
+export { loadStates, resetStateSelection, updateStatesVisibility, zoomToState };
