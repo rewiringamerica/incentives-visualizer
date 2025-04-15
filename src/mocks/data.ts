@@ -27,6 +27,63 @@ export const mockIncentivesData: IncentivesResponse = {
       eligible_geo_group: 'ca-energy-smart-homes-territories',
     },
     {
+      id: 'CA-2',
+      eligible_geo_group: 'ca-energy-smart-homes-territories',
+      payment_methods: [PaymentMethod.REBATE],
+      items: [
+        'electric_stove',
+        'other_heat_pump',
+        'non_heat_pump_clothes_dryer',
+        'heat_pump_clothes_dryer',
+      ],
+      program: 'ca_CaliforniaEnergySmartHomes',
+      amount: {
+        type: 'dollar_amount',
+        number: 3750,
+      },
+      owner_status: [OwnerStatus.HOMEOWNER],
+      short_description: {
+        en: '$3,750 rebate for installing heat pump space heating, heat pump water heating, induction cooking, and an electric dryer (must install all).',
+      },
+      start_date: '2025-01-01',
+      end_date: '2025-12-31',
+    },
+    {
+      id: 'CA-3',
+      eligible_geo_group: 'ca-energy-smart-homes-territories',
+      payment_methods: [PaymentMethod.REBATE],
+      items: ['heat_pump_clothes_dryer'],
+      program: 'ca_CaliforniaEnergySmartHomes',
+      amount: {
+        type: 'dollar_amount',
+        number: 250,
+      },
+      owner_status: [OwnerStatus.HOMEOWNER],
+      short_description: {
+        en: '$250 bonus rebate for installing a heat pump dryer when making a whole building electrification upgrade.',
+      },
+      start_date: '2024-01-01',
+      end_date: '2025-12-31',
+    },
+    {
+      id: 'CA-4',
+      eligible_geo_group: 'ca-energy-smart-homes-territories',
+      payment_methods: [PaymentMethod.REBATE],
+      items: ['other'],
+      program: 'ca_CaliforniaEnergySmartHomes',
+      amount: {
+        type: 'dollar_amount',
+        number: 1000,
+        minimum: 1000,
+      },
+      owner_status: [OwnerStatus.HOMEOWNER],
+      short_description: {
+        en: 'Bonus rebate of up to $1,000 for electric infrastructure upgrades (per unit served) when making a whole home electrification alteration.',
+      },
+      start_date: '2024-01-01',
+      end_date: '2025-12-31',
+    },
+    {
       id: 'NY-33',
       program: 'ny-appliance-upgrade-program',
       payment_methods: [PaymentMethod.REBATE],

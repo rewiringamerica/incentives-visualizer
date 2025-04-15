@@ -1,24 +1,20 @@
+import * as turf from '@turf/turf';
 import maplibregl from 'maplibre-gl';
 import { STATE_ABBREVIATION_TO_NAME } from '../data/abbrevsToFull';
 import geojsonData from '../data/geojson/states-albers.json';
 import { BETA_STATES, LAUNCHED_STATES, STATES_PLUS_DC } from '../data/states';
 import { addLabels } from './MapLabels';
 
-export interface StateData {
-  name: string;
-  description: string;
-}
-
-let isStateSelected = false;
-
 function loadStates(
   map: maplibregl.Map,
-  onStateSelect?: (data: StateData) => void,
+  onStateSelect?: (feature: maplibregl.MapGeoJSONFeature) => void,
 ) {
-  geojsonData.features.forEach(feature => {
-    const name = feature.properties?.ste_name;
-    if (Array.isArray(name)) {
-      feature.properties.ste_name = name[0];
+  (geojsonData as GeoJSON.FeatureCollection).features.forEach(feature => {
+    if (feature.properties) {
+      const name = feature.properties.ste_name;
+      if (Array.isArray(name)) {
+        feature.properties.ste_name = name[0];
+      }
     }
   });
 
@@ -210,17 +206,10 @@ function loadStates(
 
       // If the clicked state is covered, select it
       const feature = e.features[0];
-      const stateName = feature.properties.ste_name;
-
-      const stateData: StateData = {
-        name: stateName,
-        description: `Details about ${stateName}...`,
-      };
-      onStateSelect(stateData);
-      if (!isStateSelected) {
+      onStateSelect(feature);
+      setTimeout(() => {
         zoomToState(map, feature);
-        isStateSelected = true;
-      }
+      }, 10);
     }
   });
 }
@@ -230,33 +219,15 @@ function zoomToState(
   map: maplibregl.Map,
   feature: maplibregl.MapGeoJSONFeature,
 ) {
-  const bounds = [Infinity, Infinity, -Infinity, -Infinity];
-
-  function processCoordinates(coords) {
-    if (Array.isArray(coords[0])) {
-      coords.map(c => processCoordinates(c));
-    } else {
-      bounds[0] = Math.min(bounds[0], coords[0]);
-      bounds[1] = Math.min(bounds[1], coords[1]);
-      bounds[2] = Math.max(bounds[2], coords[0]);
-      bounds[3] = Math.max(bounds[3], coords[1]);
-    }
-  }
-
-  if (
-    feature.geometry &&
-    feature.geometry.type !== 'GeometryCollection' &&
-    'coordinates' in feature.geometry
-  ) {
-    processCoordinates(feature.geometry.coordinates);
-  }
-
-  map.fitBounds(bounds as [number, number, number, number], {
-    padding: 40,
-    maxZoom: 6,
-    duration: 1000,
+  const centroid = turf.centerOfMass(feature).geometry.coordinates;
+    
+  map.flyTo({
+    center: centroid as [number, number],
+    zoom: 6,
+    essential: true,
   });
 }
+
 
 function updateStatesVisibility(map: maplibregl.Map, visible: boolean) {
   // exclude no coverage, because we don't show

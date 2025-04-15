@@ -1,57 +1,64 @@
 import React, { useEffect, useState } from 'react';
-import placeholderIcon from '../assets/placeholder_icon.png';
+import { STATE_NAME_TO_ABBREVIATION } from '../data/abbrevsToFull';
+import {
+  getAllCategoryNames,
+  getIncentiveCategory,
+} from '../data/incentiveCategories';
 import { mockIncentivesData } from '../mocks/data';
 import { Incentive } from '../mocks/types';
 import { IncentiveCard } from './incentive-card';
-
-export interface ChipData {
-  id: string;
-  label: string;
-  selected: boolean;
-}
+import IncentivesFilter from './IncentivesFilter';
 
 interface SidebarProps {
-  stateData?: {
-    name: string;
-    description: string;
-  };
-  countyData?: {
-    name: string;
-    description: string;
-  };
-  onChipSelectionChange?: (chips: ChipData[]) => void;
+  selectedFeature?: maplibregl.MapGeoJSONFeature | null;
   onClose?: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = props => {
-  const { stateData, countyData, onChipSelectionChange, onClose } = props;
-
+  const { selectedFeature, onClose } = props;
   const [isVisible, setIsVisible] = useState(false);
-  const [chips, setChips] = useState<ChipData[]>([
-    { id: 'chip1', label: 'Incentive 1', selected: true },
-    { id: 'chip2', label: 'Incentive 2', selected: true },
-    { id: 'chip3', label: 'Incentive 3', selected: true },
-    { id: 'chip4', label: 'Incentive 4', selected: true },
-    { id: 'chip5', label: 'Incentive 5', selected: true },
-    { id: 'chip6', label: 'Incentive 6', selected: true },
-    { id: 'chip7', label: 'Incentive 7', selected: true },
-    { id: 'chip8', label: 'Incentive 8', selected: true },
-    { id: 'chip9', label: 'Incentive 9', selected: true },
-  ]);
+  const [filterOptions, setFilterOptions] = useState<string[]>([]);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   useEffect(() => {
-    // Show the sidebar if stateData or countyData exists; hide otherwise
-    setIsVisible(!!stateData || !!countyData);
-  }, [stateData, countyData]);
+    if (selectedFeature?.properties?.ste_type) {
+      const stateName = selectedFeature.properties.ste_name;
+      const stateAbbr = STATE_NAME_TO_ABBREVIATION[stateName] || '';
+      const filteredIncentives = mockIncentivesData.incentives.filter(
+        incentive => stateAbbr && incentive.id.startsWith(stateAbbr + '-'),
+      );
 
-  const toggleChip = (id: string) => {
-    const updatedChips = chips.map(chip =>
-      chip.id === id ? { ...chip, selected: !chip.selected } : chip,
-    );
-    setChips(updatedChips);
-    if (onChipSelectionChange) {
-      onChipSelectionChange(updatedChips);
+      // Create a set of available categories for this state
+      const categorySet = new Set<string>();
+      filteredIncentives.forEach(incentive => {
+        incentive.items.forEach(item => {
+          const category = getIncentiveCategory(item);
+          if (category) {
+            categorySet.add(category);
+          }
+        });
+      });
+
+      // If no categories are found, fall back to all possible categories
+      const options =
+        categorySet.size > 0
+          ? Array.from(categorySet).sort()
+          : getAllCategoryNames();
+
+      setFilterOptions(options);
+      setSelectedFilters(options);
+    } else {
+      setFilterOptions([]);
+      setSelectedFilters([]);
     }
+  }, [selectedFeature]);
+
+  useEffect(() => {
+    setIsVisible(!!selectedFeature);
+  }, [selectedFeature]);
+
+  const handleFilterChange = (selected: string[]) => {
+    setSelectedFilters(selected);
   };
 
   const handleClose = () => {
@@ -61,10 +68,30 @@ const Sidebar: React.FC<SidebarProps> = props => {
     }
   };
 
-  // If not visible, render nothing
   if (!isVisible) {
     return null;
   }
+
+  const isState = selectedFeature?.properties?.ste_type;
+  const name = isState
+    ? selectedFeature.properties.ste_name
+    : selectedFeature?.properties?.coty_name;
+  const stateAbbr = isState ? STATE_NAME_TO_ABBREVIATION[name] || '' : '';
+  const stateIncentives = isState
+    ? mockIncentivesData.incentives.filter(
+        incentive => stateAbbr && incentive.id.startsWith(stateAbbr + '-'),
+      )
+    : mockIncentivesData.incentives;
+
+  const filteredIncentives =
+    selectedFilters.length > 0
+      ? stateIncentives.filter(incentive =>
+          incentive.items.some(item => {
+            const category = getIncentiveCategory(item);
+            return category && selectedFilters.includes(category);
+          }),
+        )
+      : [];
 
   return (
     <div className="w-2/5 h-full bg-gray-100 relative overflow-y-auto">
@@ -89,69 +116,49 @@ const Sidebar: React.FC<SidebarProps> = props => {
         </svg>
       </button>
 
-      {/* Add some top padding so content sits below the close button */}
       <div className="pt-12 px-3 pb-4">
-        <div className="flex flex-wrap justify-center gap-2 mb-4">
-          {chips.map(chip => (
-            <button
-              key={chip.id}
-              onClick={() => toggleChip(chip.id)}
-              className={
-                chip.selected
-                  ? 'flex items-center px-2 py-1 text-sm rounded-full bg-[#eed87e] text-black border-0'
-                  : 'flex items-center px-2 py-1 text-sm rounded-full bg-gray-300 text-gray-700 border-0'
-              }
-            >
-              <input
-                type="checkbox"
-                checked={chip.selected}
-                readOnly
-                className="mr-1"
-              />
-              <img src={placeholderIcon} alt="icon" className="w-4 h-4 mr-1" />
-              <span>{chip.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {stateData ? (
-          <div>
-            <h2 className="text-xl font-bold mb-2">{stateData.name}</h2>
-            <p>{stateData.description}</p>
-            <div className="mt-4 space-y-4">
-              {mockIncentivesData.incentives.map((incentive: Incentive) => (
-                <IncentiveCard
-                  key={incentive.id}
-                  typeChips={incentive.payment_methods}
-                  headline={incentive.program}
-                  subHeadline={incentive.eligible_geo_group || ''}
-                  body={incentive.short_description.en}
-                  warningChip={
-                    incentive.low_income ? 'Low Income Eligible' : null
-                  }
-                  buttonUrl={incentive.more_info_url?.en || null}
-                />
-              ))}
-            </div>
+        {name && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Filter by incentive type
+            </label>
+            <IncentivesFilter
+              options={filterOptions}
+              selectedOptions={selectedFilters}
+              onChange={handleFilterChange}
+            />
+            {selectedFilters.length === 0 && (
+              <p className="mt-2 text-sm text-orange-600">
+                Select at least one filter type to see available incentives.
+              </p>
+            )}
           </div>
-        ) : countyData ? (
+        )}
+
+        {name ? (
           <div>
-            <h2 className="text-xl font-bold mb-2">{countyData.name}</h2>
-            <p>{countyData.description}</p>
+            <h2 className="text-xl font-bold mb-2">{name}</h2>
+            <p>Details about {name}</p>
             <div className="mt-4 space-y-4">
-              {mockIncentivesData.incentives.map((incentive: Incentive) => (
-                <IncentiveCard
-                  key={incentive.id}
-                  typeChips={incentive.payment_methods}
-                  headline={incentive.program}
-                  subHeadline={incentive.eligible_geo_group || ''}
-                  body={incentive.short_description.en}
-                  warningChip={
-                    incentive.low_income ? 'Low Income Eligible' : null
-                  }
-                  buttonUrl={incentive.more_info_url?.en || null}
-                />
-              ))}
+              {filteredIncentives.length > 0 ? (
+                filteredIncentives.map((incentive: Incentive) => (
+                  <IncentiveCard
+                    key={incentive.id}
+                    typeChips={incentive.payment_methods}
+                    headline={incentive.program}
+                    subHeadline={incentive.eligible_geo_group || ''}
+                    body={incentive.short_description.en}
+                    warningChip={
+                      incentive.low_income ? 'Low Income Eligible' : null
+                    }
+                    buttonUrl={incentive.more_info_url?.en || null}
+                  />
+                ))
+              ) : (
+                <p className="text-gray-500">
+                  No incentives match the selected filters.
+                </p>
+              )}
             </div>
           </div>
         ) : (

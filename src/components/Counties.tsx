@@ -4,23 +4,20 @@ import countyData from '../data/geojson/counties-albers.json';
 
 const COUNTY_LABEL_ID = 'county-labels-layer';
 
-export interface CountyData {
-  name: string;
-  description: string;
-}
-
-let isCountySelected = false;
-
-export function loadCounties(
+function loadCounties(
   map: maplibregl.Map,
-  onCountySelect?: (data: CountyData) => void,
+  onCountySelect?: (feature: maplibregl.MapGeoJSONFeature) => void,
 ) {
   // Process county names to handle array format
   (countyData as GeoJSON.FeatureCollection).features.forEach(feature => {
     if (feature.properties) {
       const name = feature.properties.coty_name;
+      const state = feature.properties.ste_name;
       if (Array.isArray(name)) {
         feature.properties.coty_name = name[0];
+      }
+      if (Array.isArray(state)) {
+        feature.properties.ste_name = state[0];
       }
     }
   });
@@ -153,17 +150,10 @@ export function loadCounties(
   map.on('click', 'counties-layer', e => {
     if (e.features && e.features.length > 0 && onCountySelect) {
       const feature = e.features[0];
-      const countyName = feature.properties?.coty_name;
-
-      const countyData: CountyData = {
-        name: countyName || 'Unknown County',
-        description: `Details about ${countyName || 'Unknown County'}...`,
-      };
-      onCountySelect(countyData);
-      if (!isCountySelected) {
+      onCountySelect(feature);
+      setTimeout(() => {
         zoomToCounty(map, feature);
-        isCountySelected = true;
-      }
+      }, 10);
     }
   });
 }
@@ -173,34 +163,13 @@ function zoomToCounty(
   map: maplibregl.Map,
   feature: maplibregl.MapGeoJSONFeature,
 ) {
-  const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+  const centroid = turf.centerOfMass(feature).geometry.coordinates;
 
-  function processCoordinates(coords: number[]) {
-    if (Array.isArray(coords[0])) {
-      coords.forEach(c => processCoordinates(c as unknown as number[]));
-    } else {
-      bounds[0] = Math.min(bounds[0], coords[0]);
-      bounds[1] = Math.min(bounds[1], coords[1]);
-      bounds[2] = Math.max(bounds[2], coords[0]);
-      bounds[3] = Math.max(bounds[3], coords[1]);
-    }
-  }
-
-  if (
-    feature.geometry &&
-    feature.geometry.type !== 'GeometryCollection' &&
-    'coordinates' in feature.geometry
-  ) {
-    processCoordinates(feature.geometry.coordinates as number[]);
-  }
-
-  map.fitBounds(bounds as [number, number, number, number], {
-    padding: 40,
-    maxZoom: 10,
-    duration: 1000,
+  map.flyTo({
+    center: centroid as [number, number],
+    zoom: 8,
+    essential: true,
   });
 }
 
-export function resetCountySelection() {
-  isCountySelected = false;
-}
+export { loadCounties, zoomToCounty };
