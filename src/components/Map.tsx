@@ -1,18 +1,30 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import '../styles/index.css';
-import { CountyData, loadCounties } from './Counties';
+import { loadCounties } from './Counties';
 import Legend from './Legend';
 import { loadStates, StateData, updateStatesVisibility } from './States';
 import Toggle from './Toggle';
+import MapHighlights from './MapHighlights';
 
 interface MapProps {
-  onStateSelect?: (data: StateData) => void;
-  onCountySelect?: (data: CountyData) => void;
+  onStateSelect?: (feature: maplibregl.MapGeoJSONFeature) => void;
+  onCountySelect?: (feature: maplibregl.MapGeoJSONFeature) => void;
+  mapInstance: maplibregl.Map | null;
+  onMapSet: React.Dispatch<React.SetStateAction<maplibregl.Map | null>>;
+  selectedState: maplibregl.MapGeoJSONFeature | null;
+  selectedCounty: maplibregl.MapGeoJSONFeature | null;
 }
 
-const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
+const Map: React.FC<MapProps> = ({
+  onStateSelect,
+  onCountySelect,
+  mapInstance,
+  onMapSet,
+  selectedState,
+  selectedCounty,
+}) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -44,10 +56,11 @@ const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
       loadCounties(map, onCountySelect);
       loadStates(map, onStateSelect, isVisible);
       setMapInstance(map);
+      onMapSet(map);
     });
 
     return () => map.remove();
-  }, [onStateSelect, onCountySelect]);
+  }, [onStateSelect, onCountySelect, onMapSet]);
 
   useEffect(() => {
     if (mapInstance) {
@@ -60,6 +73,11 @@ const Map: React.FC<MapProps> = ({ onStateSelect, onCountySelect }) => {
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       <Toggle map={mapInstance} isVisible={isVisible} onToggle={setIsVisible} />
       <Legend map={mapInstance} isVisible={isVisible} />
+      <MapHighlights
+        map={mapInstance}
+        selectedState={selectedState}
+        selectedCounty={selectedCounty}
+      />
     </div>
   );
 };
