@@ -4,21 +4,20 @@ import countyData from '../data/geojson/counties-albers.json';
 
 const COUNTY_LABEL_ID = 'county-labels-layer';
 
-export interface CountyData {
-  name: string;
-  description: string;
-}
-
 function loadCounties(
   map: maplibregl.Map,
-  onCountySelect?: (data: CountyData) => void,
+  onCountySelect?: (feature: maplibregl.MapGeoJSONFeature) => void,
 ) {
   // Process county names to handle array format
   (countyData as GeoJSON.FeatureCollection).features.forEach(feature => {
     if (feature.properties) {
       const name = feature.properties.coty_name;
+      const state = feature.properties.ste_name;
       if (Array.isArray(name)) {
         feature.properties.coty_name = name[0];
+      }
+      if (Array.isArray(state)) {
+        feature.properties.ste_name = state[0];
       }
     }
   });
@@ -151,13 +150,7 @@ function loadCounties(
   map.on('click', 'counties-layer', e => {
     if (e.features && e.features.length > 0 && onCountySelect) {
       const feature = e.features[0];
-      const countyName = feature.properties?.coty_name;
-
-      const countyData: CountyData = {
-        name: countyName || 'Unknown County',
-        description: `Details about ${countyName || 'Unknown County'}...`,
-      };
-      onCountySelect(countyData);
+      onCountySelect(feature);
       setTimeout(() => {
         zoomToCounty(map, feature);
       }, 10);

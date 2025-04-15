@@ -2,15 +2,18 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import React, { useEffect, useRef } from 'react';
 import '../styles/index.css';
-import { CountyData, loadCounties } from './Counties';
+import { loadCounties } from './Counties';
 import Legend from './Legend';
-import { loadStates, StateData } from './States';
+import MapHighlights from './MapHighlights';
+import { loadStates } from './States';
 
 interface MapProps {
-  onStateSelect?: (data: StateData) => void;
-  onCountySelect?: (data: CountyData) => void;
+  onStateSelect?: (feature: maplibregl.MapGeoJSONFeature) => void;
+  onCountySelect?: (feature: maplibregl.MapGeoJSONFeature) => void;
   mapInstance: maplibregl.Map | null;
   onMapSet: React.Dispatch<React.SetStateAction<maplibregl.Map | null>>;
+  selectedState: maplibregl.MapGeoJSONFeature | null;
+  selectedCounty: maplibregl.MapGeoJSONFeature | null;
 }
 
 const Map: React.FC<MapProps> = ({
@@ -18,6 +21,8 @@ const Map: React.FC<MapProps> = ({
   onCountySelect,
   mapInstance,
   onMapSet,
+  selectedState,
+  selectedCounty,
 }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const STYLE_VERSION = 8; // Required for declaring a style, may change in the future
@@ -57,6 +62,11 @@ const Map: React.FC<MapProps> = ({
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       <Legend map={mapInstance} />
+      <MapHighlights
+        map={mapInstance}
+        selectedState={selectedState}
+        selectedCounty={selectedCounty}
+      />
     </div>
   );
 };
