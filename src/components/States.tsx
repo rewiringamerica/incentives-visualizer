@@ -19,10 +19,6 @@ function loadStates(
   });
 
   let hoveredStateId: string | number | null = null;
-  const tooltip = new maplibregl.Popup({
-    closeButton: false,
-    closeOnClick: false,
-  });
 
   map.addSource('statesData', {
     type: 'geojson',
@@ -149,7 +145,7 @@ function loadStates(
     map.getCanvas().style.cursor = 'pointer';
   });
 
-  // Set hover state and show tooltip
+  // Set hover state
   map.on('mousemove', 'states-layer', e => {
     if (e.features && e.features.length > 0) {
       if (hoveredStateId !== null) {
@@ -163,14 +159,10 @@ function loadStates(
         { source: 'statesData', id: hoveredStateId },
         { hover: true },
       );
-
-      const steName = e.features[0].properties.ste_name;
-
-      tooltip.setLngLat(e.lngLat).setHTML(steName).addTo(map);
     }
   });
 
-  // Remove hover state and tooltip when leaving
+  // Remove hover state when leaving
   map.on('mouseleave', 'states-layer', () => {
     map.getCanvas().style.cursor = '';
     if (hoveredStateId !== null) {
@@ -182,7 +174,6 @@ function loadStates(
         { hover: false },
       );
     }
-    tooltip.remove();
     hoveredStateId = null;
   });
 

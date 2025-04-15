@@ -100,10 +100,6 @@ function loadCounties(
   }
 
   let hoveredCountyId: string | number | null = null;
-  const tooltip = new maplibregl.Popup({
-    closeButton: false,
-    closeOnClick: false,
-  });
 
   // Change cursor on hover
   map.on('mouseenter', 'counties-layer', () => {
@@ -124,10 +120,6 @@ function loadCounties(
         { source: 'countiesData', id: hoveredCountyId },
         { hover: true },
       );
-
-      const cotyName = e.features[0].properties?.coty_name;
-
-      tooltip.setLngLat(e.lngLat).setHTML(cotyName).addTo(map);
     }
   });
 
@@ -142,7 +134,6 @@ function loadCounties(
         { hover: false },
       );
     }
-    tooltip.remove();
     hoveredCountyId = null;
   });
 
