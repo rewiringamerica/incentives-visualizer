@@ -4,8 +4,7 @@ import {
   getAllCategoryNames,
   getIncentiveCategory,
 } from '../data/incentiveCategories';
-import { mockIncentivesData } from '../mocks/data';
-import { Incentive } from '../mocks/types';
+import { $api } from '../lib/api';
 import { IncentiveCard } from './incentive-card';
 import IncentivesFilter from './IncentivesFilter';
 
@@ -20,17 +19,21 @@ const Sidebar: React.FC<SidebarProps> = props => {
   const [filterOptions, setFilterOptions] = useState<string[]>([]);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
+  const incentives = $api.useQuery('get', '/api/v1/incentives', {
+    params: {
+      query: {
+        state: selectedFeature?.properties?.ste_name
+          ? STATE_NAME_TO_ABBREVIATION[selectedFeature?.properties?.ste_name]
+          : undefined,
+      },
+    },
+  });
+
   useEffect(() => {
     if (selectedFeature?.properties?.ste_type) {
-      const stateName = selectedFeature.properties.ste_name;
-      const stateAbbr = STATE_NAME_TO_ABBREVIATION[stateName] || '';
-      const filteredIncentives = mockIncentivesData.incentives.filter(
-        incentive => stateAbbr && incentive.id.startsWith(stateAbbr + '-'),
-      );
-
       // Create a set of available categories for this state
       const categorySet = new Set<string>();
-      filteredIncentives.forEach(incentive => {
+      incentives.data?.incentives.forEach(incentive => {
         incentive.items.forEach(item => {
           const category = getIncentiveCategory(item);
           if (category) {
@@ -73,24 +76,19 @@ const Sidebar: React.FC<SidebarProps> = props => {
   }
 
   const isState = selectedFeature?.properties?.ste_type;
+
   const name = isState
     ? selectedFeature.properties.ste_name
     : selectedFeature?.properties?.coty_name;
-  const stateAbbr = isState ? STATE_NAME_TO_ABBREVIATION[name] || '' : '';
-  const stateIncentives = isState
-    ? mockIncentivesData.incentives.filter(
-        incentive => stateAbbr && incentive.id.startsWith(stateAbbr + '-'),
-      )
-    : mockIncentivesData.incentives;
 
   const filteredIncentives =
     selectedFilters.length > 0
-      ? stateIncentives.filter(incentive =>
+      ? incentives.data?.incentives.filter(incentive =>
           incentive.items.some(item => {
             const category = getIncentiveCategory(item);
             return category && selectedFilters.includes(category);
           }),
-        )
+        ) ?? []
       : [];
 
   return (
@@ -141,7 +139,7 @@ const Sidebar: React.FC<SidebarProps> = props => {
             <p>Details about {name}</p>
             <div className="mt-4 space-y-4">
               {filteredIncentives.length > 0 ? (
-                filteredIncentives.map((incentive: Incentive) => (
+                filteredIncentives.map(incentive => (
                   <IncentiveCard
                     key={incentive.id}
                     typeChips={incentive.payment_methods}
@@ -149,7 +147,7 @@ const Sidebar: React.FC<SidebarProps> = props => {
                     subHeadline={incentive.eligible_geo_group || ''}
                     body={incentive.short_description.en}
                     warningChip={
-                      incentive.low_income ? 'Low Income Eligible' : null
+                      incentive.income_qualified ? 'Income Qualified' : null
                     }
                     buttonUrl={incentive.more_info_url?.en || null}
                   />

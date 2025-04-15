@@ -7,7 +7,7 @@
   "scripts": {
     "start": "parcel serve src/index.html",
     "build": "parcel build src/index.html",
-    "generate-types": "npx openapi-typescript https://api.rewiringamerica.org/spec.json --output src/types/api.gen.ts",
+    "generate-types": "npx openapi-typescript  https://apirewiringamericaorg-production.up.railway.app/spec.json --output src/types/api.gen.ts",
     "test": "vitest",
     "test:playwright": "playwright test",
     "format": "prettier -c src",
@@ -22,6 +22,7 @@
     "@eslint/markdown": "^6.3.0",
     "@mui/material": "^6.4.7",
     "@tailwindcss/postcss": "^4.0.3",
+    "@tanstack/react-query": "^5.74.3",
     "@turf/turf": "^7.2.0",
     "dirty-reprojectors": "^0.0.2",
     "maplibre-gl": "^5.1.1",
