@@ -1,8 +1,8 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import logo from '../assets/logo.png';
-import geojsonData from '../data/geojson/states-albers.json';
-import { US_STATE_NAMES } from '../data/states';
+import countyGeojson from '../data/geojson/counties-albers.json';
+import stateGeojson from '../data/geojson/states-albers.json';
 
 interface NavbarProps {
   map: maplibregl.Map;
@@ -10,15 +10,72 @@ interface NavbarProps {
     map: maplibregl.Map,
     feature: maplibregl.MapGeoJSONFeature,
   ) => void;
-  onFeatureSelect: (feature: maplibregl.MapGeoJSONFeature) => void;
+  zoomToCounty: (
+    map: maplibregl.Map,
+    feature: maplibregl.MapGeoJSONFeature,
+  ) => void;
+  onStateSelect: (feature: maplibregl.MapGeoJSONFeature) => void;
+  onCountySelect: (feature: maplibregl.MapGeoJSONFeature) => void;
 }
+
+type SearchOption = {
+  label: string;
+  type: 'state' | 'county';
+  feature?: maplibregl.MapGeoJSONFeature;
+};
 
 const Navbar: React.FC<NavbarProps> = ({
   map,
   zoomToState,
-  onFeatureSelect,
+  zoomToCounty,
+  onStateSelect,
+  onCountySelect,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+
+  const countiesFiltered = countyGeojson.features.filter(feature => {
+    const coty_type = feature.properties?.coty_type;
+    return coty_type && coty_type === 'county';
+  });
+
+  const statesFiltered = stateGeojson.features.filter(feature => {
+    const ste_type = feature.properties?.ste_type;
+    return ste_type && ste_type === 'state';
+  });
+
+  const searchOptions: SearchOption[] = [
+    ...statesFiltered.map(feature => {
+      const stateName = Array.isArray(feature.properties?.ste_name)
+        ? feature.properties.ste_name[0]
+        : feature.properties?.ste_name;
+
+      let stateDisplayName = stateName;
+      if (stateName === 'District of Columbia') {
+        stateDisplayName = 'Washington, D.C.';
+      }
+
+      return {
+        label: stateDisplayName,
+        type: 'state',
+        feature,
+      };
+    }),
+    ...countiesFiltered.map(feature => {
+      const countyName = Array.isArray(feature.properties?.coty_name)
+        ? feature.properties.coty_name[0]
+        : feature.properties?.coty_name;
+
+      const stateName = Array.isArray(feature.properties?.ste_name)
+        ? feature.properties.ste_name[0]
+        : feature.properties?.ste_name;
+
+      return {
+        label: `${countyName}, ${stateName}`,
+        type: 'county',
+        feature,
+      };
+    }),
+  ];
 
   const handleSearchChange = (
     event: React.SyntheticEvent<Element, Event>,
@@ -29,23 +86,26 @@ const Navbar: React.FC<NavbarProps> = ({
 
   const handleSubmit = () => {
     if (searchTerm.trim()) {
-      const stateName = searchTerm.trim();
+      const searchValue = searchTerm.trim();
 
-      const feature = geojsonData.features.find(f => {
-        const steNameRaw = f.properties?.ste_name;
-        // Since steName is in form ['name'], we need to parse it
-        const steName = Array.isArray(steNameRaw)
-          ? steNameRaw[0]
-          : steNameRaw?.replace(/^\['|'\]$/g, '');
+      const searchOption = searchOptions.find(
+        option => option.label === searchValue,
+      );
+      if (!searchOption) {
+        console.error(`State/county "${searchValue}" not found.`);
+        return;
+      }
 
-        return steName === stateName;
-      });
+      const feature = searchOption.feature;
 
-      if (feature) {
-        onFeatureSelect(feature as maplibregl.MapGeoJSONFeature);
-        zoomToState(map, feature as maplibregl.MapGeoJSONFeature);
+      if (feature && searchOption.type === 'state') {
+        onStateSelect(feature);
+        zoomToState(map, feature);
+      } else if (feature && searchOption.type === 'county') {
+        onCountySelect(feature);
+        zoomToCounty(map, feature);
       } else {
-        console.error(`State "${searchTerm}" not found.`);
+        console.error(`State/county "${searchTerm}" not found.`);
       }
     }
   };
@@ -68,7 +128,7 @@ const Navbar: React.FC<NavbarProps> = ({
         style={{ maxWidth: '400px', width: '100%' }}
       >
         <Autocomplete
-          options={US_STATE_NAMES}
+          options={searchOptions}
           inputValue={searchTerm}
           onInputChange={(event, value) => handleSearchChange(event, value)}
           disableClearable

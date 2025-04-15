@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import ReactDOM from 'react-dom/client';
+import { zoomToCounty } from './Counties';
 import Map from './Map';
 import NavBar from './Navbar';
 import Sidebar from './Sidebar';
@@ -42,7 +43,9 @@ const App: React.FC = () => {
       <NavBar
         map={mapInstance}
         zoomToState={zoomToState}
-        onFeatureSelect={handleStateSelect}
+        zoomToCounty={zoomToCounty}
+        onStateSelect={handleStateSelect}
+        onCountySelect={handleCountySelect}
       />
       <div className="flex h-[calc(100vh-64px)]">
         <Sidebar

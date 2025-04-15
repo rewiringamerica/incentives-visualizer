@@ -172,4 +172,4 @@ function zoomToCounty(
   });
 }
 
-export { loadCounties };
+export { loadCounties, zoomToCounty };
