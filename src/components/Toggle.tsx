@@ -1,4 +1,5 @@
 import maplibregl from 'maplibre-gl';
+import React, { useEffect, useState } from 'react';
 
 interface ToggleProps {
   map: maplibregl.Map | null;
@@ -6,7 +7,28 @@ interface ToggleProps {
   onToggle?: (visible: boolean) => void;
 }
 
-const Toggle: React.FC<ToggleProps> = ({ isVisible, onToggle }) => {
+const Toggle: React.FC<ToggleProps> = ({ map, isVisible, onToggle }) => {
+  const [showToggle, setShowToggle] = useState(true);
+
+  useEffect(() => {
+    if (!map) {return;}
+
+    const checkZoom = () => {
+      const zoom = map.getZoom();
+      setShowToggle(zoom < 6); // Only show toggle if zoomed out (state-level)
+    };
+
+    // Listen for zoom changes
+    map.on('zoom', checkZoom);
+    checkZoom(); // run once on mount in case user is already zoomed in
+
+    return () => {
+      map.off('zoom', checkZoom);
+    };
+  }, [map]);
+
+  if (!showToggle) {return null;}
+
   const toggle = () => {
     if (onToggle) {
       onToggle(!isVisible);
