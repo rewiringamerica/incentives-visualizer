@@ -11,23 +11,26 @@ const Toggle: React.FC<ToggleProps> = ({ map, isVisible, onToggle }) => {
   const [showToggle, setShowToggle] = useState(true);
 
   useEffect(() => {
-    if (!map) {return;}
+    if (!map) {
+      return;
+    }
 
     const checkZoom = () => {
       const zoom = map.getZoom();
-      setShowToggle(zoom < 6); // Only show toggle if zoomed out (state-level)
+      setShowToggle(zoom < 6); // only show toggle if zoomed out
     };
 
-    // Listen for zoom changes
     map.on('zoom', checkZoom);
-    checkZoom(); // run once on mount in case user is already zoomed in
+    checkZoom(); // initial check
 
     return () => {
       map.off('zoom', checkZoom);
     };
   }, [map]);
 
-  if (!showToggle) {return null;}
+  if (!showToggle) {
+    return null;
+  }
 
   const toggle = () => {
     if (onToggle) {
@@ -49,7 +52,7 @@ const Toggle: React.FC<ToggleProps> = ({ map, isVisible, onToggle }) => {
         style={{
           width: '185px',
           height: '50px',
-          backgroundColor: '#f3f4f6',
+          backgroundColor: '#6C7484',
           borderRadius: '25px',
           display: 'flex',
           alignItems: 'center',
@@ -66,7 +69,7 @@ const Toggle: React.FC<ToggleProps> = ({ map, isVisible, onToggle }) => {
             fontSize: '14px',
             textAlign: 'center',
             fontWeight: !isVisible ? 'bold' : 'normal',
-            color: !isVisible ? '#333' : '#888',
+            color: !isVisible ? '#1E1E1E' : 'white',
             zIndex: 1,
             userSelect: 'none',
           }}
@@ -79,7 +82,7 @@ const Toggle: React.FC<ToggleProps> = ({ map, isVisible, onToggle }) => {
             fontSize: '14px',
             textAlign: 'center',
             fontWeight: isVisible ? 'bold' : 'normal',
-            color: isVisible ? '#333' : '#888',
+            color: isVisible ? '#1E1E1E' : 'white',
             zIndex: 1,
             userSelect: 'none',
           }}
@@ -87,7 +90,6 @@ const Toggle: React.FC<ToggleProps> = ({ map, isVisible, onToggle }) => {
           Coverage View
         </div>
 
-        {/* Sliding Indicator */}
         <div
           style={{
             position: 'absolute',
