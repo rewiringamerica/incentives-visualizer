@@ -1,4 +1,8 @@
-export const STATE_ABBREVIATION_TO_NAME: Record<string, string> = {
+import { paths } from '../types/api.gen'
+
+type StateAbbreviation = NonNullable<NonNullable<paths['/api/v1/incentives']['get']['parameters']['query']>['state']>
+
+export const STATE_ABBREVIATION_TO_NAME: Record<StateAbbreviation, string> = {
   AL: 'Alabama',
   AK: 'Alaska',
   AZ: 'Arizona',
@@ -50,9 +54,14 @@ export const STATE_ABBREVIATION_TO_NAME: Record<string, string> = {
   WI: 'Wisconsin',
   WY: 'Wyoming',
   DC: 'District of Columbia',
+  PR: 'Puerto Rico',
+  GU: 'Guam',
+  MP: 'Northern Mariana Islands',
+  VI: 'Virgin Islands',
+  AS: 'American Samoa',
 };
 
-export const STATE_NAME_TO_ABBREVIATION: { [key: string]: string } = {
+export const STATE_NAME_TO_ABBREVIATION: Record<string, StateAbbreviation> = {
   Alabama: 'AL',
   Alaska: 'AK',
   Arizona: 'AZ',

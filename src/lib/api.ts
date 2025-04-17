@@ -6,7 +6,6 @@ import type { paths } from '../types/api.gen';
 export function createApi(baseUrl: string) {
   const fetchClient = createFetchClient<paths>({
     baseUrl,
-    credentials: 'include',
   });
 
   return fetchClient;
@@ -15,3 +14,5 @@ export function createApi(baseUrl: string) {
 export function createReactQueryApi(baseUrl: string) {
   return createClient(createApi(baseUrl));
 }
+
+export const $api = createReactQueryApi('http://localhost:3000');

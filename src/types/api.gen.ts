@@ -4,6 +4,48 @@
  */
 
 export interface paths {
+    "/api/v0/calculator": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * (Deprecated) Find eligible incentives
+         * @deprecated
+         * @description Compute incentives for which the user is eligible, given the criteria in the request parameters.
+         */
+        get: operations["calculator-get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v0/incentives": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * (Deprecated) List all incentives
+         * @deprecated
+         * @description List all available incentives, before applying eligibility criteria. Note that there will be duplicates with only subtle differences between eligibility tiers. Use the calculator endpoint to get de-duped incentives.
+         */
+        get: operations["incentives-get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/calculator": {
         parameters: {
             query?: never;
@@ -33,9 +75,37 @@ export interface paths {
         };
         /**
          * Find utilities by location
-         * @description Returns the electric utilities that may serve the given location. Because the location is imprecise, and because utility service territories aren't precisely defined, there may be multiple results, including utilities that don't actually serve the given location.
+         * @description Returns electric and gas utilities that may serve the given location. Because the location is imprecise, and because utility service territories aren't precisely defined, there may be multiple results, including utilities that don't actually serve the given location.
          */
         get: operations["getUtilities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/states": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get state rollout status
+         * @description For each state and territory (and Washington, DC), return the development status of its state-, utility-, and local-level incentive data. (Note that federal-level incentive data is available regardless of location.)
+         *
+         *     The response's keys are two-letter state or territory codes, as [defined by the US Postal Service](https://pe.usps.com/text/pub28/28apb.htm). The response includes all 50 states, Washington DC, and the territories of Puerto Rico, Guam, American Samoa, the US Virgin Islands, and the Northern Mariana Islands.
+         *
+         *     In each key's value, the possible `status` properties are:
+         *
+         *     - `none`: state, local, and utility (SLU) incentives for the state are not in the API at all.
+         *     - `beta`: SLU incentives have not been fully vetted, and will be returned from `/api/v1/calculator` only if the `include_beta_states` request parameter is true.
+         *     - `launched`: SLU incentives are fully vetted and returned in the API.
+         */
+        get: operations["getStateStatus"];
         put?: never;
         post?: never;
         delete?: never;
@@ -64,7 +134,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/spec.json": {
+    "/api/v1/incentives": {
         parameters: {
             query?: never;
             header?: never;
@@ -72,98 +142,12 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * OpenAPI spec
-         * @description Return the OpenAPI spec for this API, in JSON form.
+         * Get incentives
+         * @description Returns incentives, optionally filtered by state
          */
-        get: operations["getOpenAPISpec"];
+        get: operations["getIncentives"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/rem/address": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * (Preview) Get By Address
-         * @description **Available in Preview Mode. Please reach out to Rewiring America at [datascience@rewiringamerica.org](mailto:datascience@rewiringamerica.org) for access.**
-         *
-         *     Predict a user's savings using the Residential Electrification Model.
-         *     This API makes predictions of the effects of an upgrade based on the address of the home being upgraded, and the current heating fuel.
-         *
-         *     Using the provided address, it first queries a large database of home properties that Rewiring America has assembled, which contains data such as home age, size, construction material, and much more. We don't know all of the properties needed to get a good estimate of energy consumption, so we perform a [Monte Carlo](https://en.wikipedia.org/wiki/Monte_Carlo_method) simulation over a sample homes chosen from a [conditional probability distribution](https://github.com/NREL/resstock/tree/develop/project_national/housing_characteristics) based the properties that we do know. We then estimate the energy consumption for each sample building by running inference using a Machine Learning based surrogate model, trained on [EnergyPlus](https://energyplus.net/) simulations.
-         *
-         *     See [API Responses](/docs/routes/responses#residential-electrification-model-get-by-address) for a detailed description of a successful response.
-         *
-         *
-         */
-        get: operations["get_by_address"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/health-impacts/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Health Impacts of Electrification
-         * @description Query and aggregate results of Rewiring America's health impacts modeling data.
-         *
-         *     Rewiring America's health impacts research models the health and air quality benefits of residential electrification. This endpoint allows users to filter data by county, state, and upgrade options to return health and air quality benefits. It aggregates data based on
-         *     specified pollutant and health-related metrics and provides the option to disaggregate results by specific housing characteristics enumerated below. Results describe the total annual benefit to the continental US.
-         *
-         *      [READ THE COMPANION REPORT](http://rewiringamerica.org/research/home-electrification-health-benefits)
-         *
-         *     **Example Python Code**
-         *
-         *     ```
-         *     import requests
-         *
-         *     # Define the API endpoint
-         *     url = "https://api.rewiringamerica.org/api/v1/health_impacts/"
-         *
-         *     # Define the query parameters
-         *     params = {
-         *         "metrics": "pm25-pri_kg_delta",
-         *         "upgrade": "hp_dryer",
-         *         "county_fips": "*",
-         *         "state": "NY"
-         *     }
-         *
-         *     # Define the headers with correct Authorization scheme
-         *     headers = {
-         *         "Authorization": "Bearer YOUR TOKEN HERE"
-         *     }
-         *
-         *     # Send the GET request
-         *     response = requests.get(url, headers=headers, params=params)
-         *
-         *     # Check the response status and print the result
-         *     if response.status_code == 200:
-         *         print("Success:", response.json())
-         *     else:
-         *         print("Error:", response.status_code, response.text)
-         *     ```
-         *
-         */
-        post: operations["query_health_impacts"];
         delete?: never;
         options?: never;
         head?: never;
@@ -265,7 +249,7 @@ export interface components {
              * @description The nature of the entity offering the incentive.
              * @enum {string}
              */
-            authority_type: "federal" | "city" | "county" | "state" | "utility" | "other";
+            authority_type: "federal" | "city" | "county" | "state" | "utility" | "gas_utility" | "other";
             /** @description The government agency, company, or organization that offers this incentive. This generally means the entity that the consumer will interact with to _claim the incentive_, as opposed to the entity that sets the program rules, or that provides funding. */
             authority?: string;
             /** @description Consumer-facing name of the program that this incentive is part of. If the program has no distinct brand name, this string will usually include the name of the offering authority as well. */
@@ -274,8 +258,10 @@ export interface components {
             program_url: string;
             /** @description A URL to supplemental information on the program, usually from a third party rather than the offering authority. Localized according to the `language` request parameter. */
             more_info_url?: string;
+            /** @description Describes whether the incentive is currently on offer.       This field is independent of the `start_date` and `end_date` fields,       which relate to the time period when the incentive is available. For       example, this field may be `true` if the funding source for an       incentive has run out, even if the incentive is still in the middle of       its availability period. */
+            paused?: boolean;
             /** @description What products or services the incentive can be used on. **NOTE**: we expect to add possible values to this field over time. Client code should gracefully handle unknown values it sees here. */
-            items: ("air_sealing" | "air_to_water_heat_pump" | "attic_or_roof_insulation" | "basement_insulation" | "battery_storage_installation" | "central_air_conditioner" | "crawlspace_insulation" | "door_replacement" | "duct_replacement" | "duct_sealing" | "ducted_heat_pump" | "ductless_heat_pump" | "ebike" | "efficiency_rebates" | "electric_outdoor_equipment" | "electric_panel" | "electric_stove" | "electric_thermal_storage_and_slab" | "electric_vehicle_charger" | "electric_wiring" | "energy_audit" | "evaporative_cooler" | "floor_insulation" | "geothermal_heating_installation" | "heat_pump_clothes_dryer" | "heat_pump_water_heater" | "new_electric_vehicle" | "new_plugin_hybrid_vehicle" | "non_heat_pump_clothes_dryer" | "non_heat_pump_water_heater" | "other" | "other_heat_pump" | "other_insulation" | "other_weatherization" | "rooftop_solar_installation" | "smart_thermostat" | "used_electric_vehicle" | "used_plugin_hybrid_vehicle" | "wall_insulation" | "whole_house_fan" | "window_replacement" | "heat_pump_air_conditioner_heater" | "weatherization")[];
+            items: ("air_sealing" | "air_to_water_heat_pump" | "attic_or_roof_insulation" | "basement_insulation" | "battery_storage_installation" | "central_air_conditioner" | "crawlspace_insulation" | "door_replacement" | "duct_replacement" | "duct_sealing" | "ducted_heat_pump" | "ductless_heat_pump" | "ebike" | "efficiency_rebates" | "electric_outdoor_equipment" | "electric_panel" | "electric_stove" | "electric_thermal_storage_and_slab" | "electric_vehicle_charger" | "electric_wiring" | "energy_audit" | "evaporative_cooler" | "floor_insulation" | "geothermal_heating_installation" | "heat_pump_clothes_dryer" | "heat_pump_water_heater" | "new_electric_vehicle" | "new_plugin_hybrid_vehicle" | "non_heat_pump_clothes_dryer" | "non_heat_pump_water_heater" | "other" | "other_heat_pump" | "other_insulation" | "other_weatherization" | "rooftop_solar_installation" | "smart_thermostat" | "used_electric_vehicle" | "used_plugin_hybrid_vehicle" | "wall_insulation" | "whole_house_fan" | "window_replacement")[];
             /** @description The amount of monetary value that a consumer can receive from this incentive.
              *
              *     This format does not capture the full range of possible incentive structures, which can be very complex and dependent on a wide range of factors. It is a simplification in many cases. There are three amount structures, distinguished by the `type` field:
@@ -350,8 +336,8 @@ export interface components {
                 state: string;
                 /** @description The city name as determined by looking up the ZIP code in our database. */
                 city?: string;
-                /** @description The county name as determined by looking up the ZIP code in our database. */
-                county?: string;
+                /** @description The FIPS code of the county, as determined by looking up the ZIP code in our database. */
+                county_fips?: string;
             };
             /** @description Information on organizations that assist in collecting, verifying, and maintaining incentive data included in this result set. */
             data_partners?: {
@@ -369,441 +355,84 @@ export interface components {
             };
             incentives: components["schemas"]["APIIncentive"][];
         };
-        /**
-         * BuildingFeatures
-         * @description A class representing the set of possible building characteristics.
-         *
-         *     All values default to None, indicating that the given characteristic is unknown for the represented residence.
-         *     If a characteristic has the string value of "None" it indicates that the characteristic, like Air Conditioning
-         *     or a Pool, is not present at the represented residence.
-         *
-         *     Attributes
-         *     ----------
-         *         geometry_floor_area (float | None): The square footage of the residence.
-         *         geometry_stories (float | None): The number of stories in the residence..
-         *         bedrooms (float | None): The number of bedrooms contained in the residence.
-         *         bathrooms (float | None) : The number of bathrooms contained in the residence.
-         *         vintage (float | None): The year in which the residence was built.
-         *         geometry_attic_type (List[str] | None): The type of attic.
-         *         hvac_cooling_type (List[str] | None): The type of cooling system present in the residence.
-         *         hvac_heating_type (List[str] | None): The type of ductwork used for heating in the residence.
-         *         geometry_garage (List[str] | None): The size of the garage as measured in the number of cars
-         *             that can be placed within the garage.
-         *         misc_pool (List[str] | None): A string indicating the presence of a pool at the residence.
-         *         misc_hot_tub_spa (List[str] | None): The fuel type used to heat a hot tub if one is present
-         *             at the residence.
-         *         misc_well_pump (List[str] | None): The efficiency of a well pump if one is located at the residence.
-         *         misc_pool_heater (List[str] | None): The presence and fuel type of a pool heater.
-         *         geometry_wall_type (List[str] | None): The material of the exterior walls on the residence.
-         *         geometry_wall_exterior_finish (List[str] | None): The finish and color of exterior walls
-         *             on the residence.
-         *         roof_material (List[str] | None): The material of the roof on the residence.
-         *         geometry_building_type_acs (List[str] | None): The American Community Survey building type
-         *             of the residence.
-         *         geometry_building_number_units_sfa (float | None): The number of units in a single-family attached building.
-         *         geometry_building_number_units_mf (float | None): The number of units in a multifamily building.
-         *         heating_fuel (List[str] | None): The primary fuel used for heating the residence.
-         */
-        BuildingFeatures: {
-            /** Geometry Floor Area */
-            geometry_floor_area?: number;
-            /** Geometry Stories */
-            geometry_stories?: number;
-            /** Bedrooms */
-            bedrooms?: number;
-            /** Bathrooms */
-            bathrooms?: number;
-            /** Vintage */
-            vintage?: number;
-            /** Geometry Attic Type */
-            geometry_attic_type?: string[];
-            /** Hvac Cooling Type */
-            hvac_cooling_type?: string[];
-            /** Hvac Heating Type */
-            hvac_heating_type?: string[];
-            /** Geometry Garage */
-            geometry_garage?: string[];
-            /** Misc Pool */
-            misc_pool?: string[];
-            /** Misc Hot Tub Spa */
-            misc_hot_tub_spa?: string[];
-            /** Misc Well Pump */
-            misc_well_pump?: string[];
-            /** Misc Pool Heater */
-            misc_pool_heater?: string[];
-            /** Geometry Wall Type */
-            geometry_wall_type?: string[];
-            /** Geometry Wall Exterior Finish */
-            geometry_wall_exterior_finish?: string[];
-            /** Roof Material */
-            roof_material?: string[];
-            /** Geometry Building Type Acs */
-            geometry_building_type_acs?: string[];
-            /** Geometry Building Number Units Sfa */
-            geometry_building_number_units_sfa?: number;
-            /** Geometry Building Number Units Mf */
-            geometry_building_number_units_mf?: number;
-            /** Heating Fuel */
-            heating_fuel?: string[];
-        };
-        /**
-         * BuildingProfile
-         * @description A class representing the known geographic features and building characteristics for a given residence.
-         *
-         *     Attributes
-         *     ----------
-         *         county (str): The county where a residence is located (in GISJOIN format).
-         *         puma (str): The Public Use Microdata Area (PUMA) where a residence is located (in GISJOIN format).
-         *         ashrae_iecc_climate_zone_2004 (str): The IECC Climate Zone where a residence is located.
-         *         weather_file_city (str): The location of the ResStock Weather File used for the area where the residence
-         *             is located.
-         *         state (str): The 2 letter postal code of the state where the residence is located.
-         *         building_features(BuildingFeatures): The building characteristics found for the residence. See BuildingFeatures
-         *             documentation for full details about possible characteristics and their meanings.
-         */
-        BuildingProfile: {
-            /** County */
-            county: string;
-            /** Puma */
-            puma: string;
-            /** Ashrae Iecc Climate Zone 2004 */
-            ashrae_iecc_climate_zone_2004: string;
-            /** Weather File City */
-            weather_file_city: string;
-            /** State */
-            state: string;
-            building_features: components["schemas"]["BuildingFeatures"];
-        };
-        /**
-         * FuelRate
-         * @description Represents a rate.
-         *
-         *     It is a `Quantity` with the addition of a rate type.
-         *
-         *     Attributes
-         *     ----------
-         *         rate_type (str): The type of rate. Values can be "fixed" or "volumetric".
-         */
-        FuelRate: {
-            /**
-             * Value
-             * @default 0
-             */
-            value: number;
-            /** Units */
-            units: string;
-            /**
-             * Rate Type
-             * @default volumetric
-             */
-            rate_type: string;
-        };
-        /**
-         * FuelSavings
-         * @description A class to represent savings data for a particular fuel.
-         *
-         *     Attributes
-         *     ----------
-         *         baseline (FuelMetrics): The data if no upgrade is passed into the surrogate model.
-         *         upgrade (FuelMetrics): The data if an upgrade is passed into the surrogate model.
-         *         delta (FuelMetrics): The deltas if an upgrade is passed into the surrogate model.
-         */
-        FuelSavings: {
-            baseline: components["schemas"]["ImpactMetric"];
-            upgrade: components["schemas"]["ImpactMetric"];
-            delta: components["schemas"]["ImpactMetric"];
-        };
-        /**
-         * RemProfileRequest
-         * @description A class representing the request body used to retrieve a building's profile.
-         *
-         *     Attributes
-         *     ----------
-         *         upgrade: Building Upgrade
-         *         heating_fuel: Heating Fuel
-         *         building_profile: Building Profile
-         */
-        RemProfileRequest: {
-            upgrade: components["schemas"]["SupportedUpgrade"];
-            heating_fuel: components["schemas"]["HeatingFuel"];
-            building_profile: components["schemas"]["BuildingProfile"];
-        };
-        /**
-         * EnergyQuantity
-         * @description A specific amount of a particular type of energy.
-         */
-        EnergyQuantity: {
-            /** Energy Type */
-            energy_type: string;
-            /** Quantity */
-            quantity: number;
-        };
-        /**
-         * EnergyTradeoff
-         * @description The change in use of one or more types of energy.
-         *
-         *     This is a model object that gets exposed via OpenAPI.
-         *
-         *     This is typically the result of a home upgrade of
-         *     some kind, such as replacing one or more appliances
-         *     or adding insulation.
-         *
-         *     It also includes a usage level tag, as tradeoffs
-         *     are typically different for different levels of
-         *     use.
-         */
-        EnergyTradeoff: {
-            /** Usage Level Tag */
-            usage_level_tag: string;
-            /**
-             * Time Period
-             * @default annual
-             */
-            time_period: string;
-            /** Delta */
-            delta: components["schemas"]["EnergyQuantity"][];
-        };
-        /**
-         * GroupBy
-         * @description Enum for valid columns to group the query results by.
-         * @enum {string}
-         */
-        GroupBy: "in_sqft_bin" | "acs_housing_type" | "in_hvac_cooling_type" | "baseline_appliance_fuel" | "upgrade_option";
-        /**
-         * HealthImpactsArgs
-         * @description The arguments to the health impacts API.
-         */
-        HealthImpactsArgs: {
-            /**
-             * Metrics
-             * @description The metric or metrics to report data on.
-             */
-            metrics: components["schemas"]["HealthMetrics"] | components["schemas"]["HealthMetrics"][];
-            /** Upgrade */
-            upgrade: components["schemas"]["UpgradeOption"] | components["schemas"]["UpgradeOption"][];
-            /**
-             * State
-             * @default []
-             */
-            state: string | string[];
-            /**
-             * County Fips
-             * @default []
-             */
-            county_fips: string | string[];
-            /**
-             * Groupby
-             * @default []
-             */
-            groupby: components["schemas"]["GroupBy"] | components["schemas"]["GroupBy"][];
-        };
-        /**
-         * HealthImpactsResponse
-         * @description The response from a health impacts API request.
-         */
-        HealthImpactsResponse: {
-            /**
-             * Data
-             * @description An array of rows, each of which has a value for each column of the result.
-             *     In Python, this can be passed to `pandas.Dataframe()` to create a data frame.
-             *
-             */
-            data: Record<string, never>[];
-            /**
-             * Warnings
-             * @description A list of warnings, if there are any.
-             *     Typically these have to do with some of the returned data being from small numbers of households.
-             *
-             */
-            warnings?: string[] | null;
-        };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
-        };
-        /**
-         * HeatingFuel
-         * @description Heating fuels supported by the API.
-         *
-         *     Note that we do not currently support "Other Fuel" or "None".
-         * @enum {string}
-         */
-        HeatingFuel: "electricity" | "fuel_oil" | "natural_gas" | "propane";
-        /**
-         * ImpactMetric
-         * @description Represents a collection of impacts associated with a fuel.
-         *
-         *     Attributes
-         *     ----------
-         *     energy
-         *         Energy statistics
-         *     emissions
-         *         Emissions statistics
-         *     cost
-         *         Cost statistics
-         */
-        ImpactMetric: {
-            energy: components["schemas"]["MetricStatistics"];
-            emissions: components["schemas"]["MetricStatistics"];
-            cost: components["schemas"]["MetricStatistics"];
-        };
-        /**
-         * Health Metrics
-         * @description Enum for valid pollutant or health-related metrics.
-         * @enum {string}
-         */
-        HealthMetrics: "pm25-pri_kg_delta" | "nh3_kg_delta" | "nox_kg_delta" | "voc_kg_delta" | "so2_kg_delta" | "premature_mortality_incidence_delta" | "premature_mortality_valuation_dollars_delta";
-        /**
-         * RangeFuelType
-         * @description Fuel types inputs that the range upgrade API supports.
-         *
-         *     Note that we do not support electricity as the input because we are modeling
-         *     upgrading to electric, and so upgrading from electric would produce no
-         *     change.
-         * @enum {string}
-         */
-        RangeFuelType: "natural_gas" | "propane";
-        /**
-         * UpgradeOption
-         * @description Enum for valid electrification upgrade options.
-         * @enum {string}
-         */
-        UpgradeOption: "hp_dryer" | "med_eff_hp_hers_sizing_no_setback_basic_enclosure" | "hp_water_heater" | "med_eff_hp_hers_sizing_no_setback" | "electric_resistance_dryer";
-        /**
-         * MetricStatistics
-         * @description Represents a statistic associated with a particular fuel and type of impact.
-         *
-         *     Attributes
-         *     ----------
-         *         mean: Mean.
-         *         median: Median.
-         *         percentile_20: 20th percentile.
-         *         percentile_80: 80th percentile.
-         */
-        MetricStatistics: {
-            mean: components["schemas"]["Quantity"];
-            median: components["schemas"]["Quantity"];
-            percentile_20: components["schemas"]["Quantity"];
-            percentile_80: components["schemas"]["Quantity"];
-        };
-        /**
-         * Quantity
-         * @description A class to represent a quantity, which is a value with units.
-         *
-         *     Attributes
-         *     ----------
-         *         value (float): The numerical value.
-         *         units (str): The units.
-         */
-        Quantity: {
-            /**
-             * Value
-             * @default 0
-             */
-            value: number;
-            /** Units */
-            units: string;
-        };
-        /**
-         * ResultFuelType
-         * @description Any heating fuel, plus \"total\".
-         * @enum {string}
-         */
-        ResultFuelType: "electricity" | "fuel_oil" | "natural_gas" | "propane" | "total";
-        /**
-         * Savings
-         * @description Represent the savings due to an upgrade.
-         *
-         *     Attributes
-         *     ----------
-         *     fuel_results
-         *         A list of results, one for each fuel type.
-         *     rates:
-         *         A list of rates used to compute the cost of fuel consumed.
-         *     emissions_factors:
-         *         A list of factors used to compute the the emissions from various fuels.
-         */
-        Savings: {
-            /** Fuel Results */
-            fuel_results: {
-                [key: string]: components["schemas"]["FuelSavings"];
+        APIProgramsResponse: {
+            /** @description Information on the entities (government agencies, companies, other organizations) that offer programs in this result set. */
+            authorities: {
+                [key: string]: {
+                    name: string;
+                    logo?: {
+                        /** @description The URL to fetch the image from. */
+                        src: string;
+                        /** @description The image's width in pixels. */
+                        width: number;
+                        /** @description The image's height in pixels. */
+                        height: number;
+                    };
+                };
             };
-            /** Rates */
-            rates: {
-                [key: string]: components["schemas"]["FuelRate"][];
+            /** @description Which sub-national sets of incentives were considered for eligibility. */
+            coverage: {
+                /** @description Two-letter state code. Determined from the "location" request parameter. */
+                state: string | null;
+                /** @description Utility ID, as passed in the "utility" request parameter. */
+                utility: string | null;
             };
-            /** Emissions Factors */
-            emissions_factors: {
-                [key: string]: components["schemas"]["Quantity"];
+            /** @description The computed location of the request's "zip" or "address" parameter. */
+            location: {
+                /** @description The two-letter abbreviation for the state, district, or territory of the location submitted in the request. */
+                state: string;
+                /** @description The city name as determined by looking up the ZIP code in our database. */
+                city?: string;
+                /** @description The FIPS code of the county, as determined by looking up the ZIP code in our database. */
+                county_fips?: string;
+            };
+            /** @description A map of IDs to incentive program data. */
+            programs: {
+                [key: string]: {
+                    /** @description Name of the program */
+                    name: string;
+                    /** @description URL to program information */
+                    url: string;
+                    /**
+                     * @description Find programs offered by these types of authorities. If absent, programs from all types of authorities will be considered.
+                     * @enum {string}
+                     */
+                    authority_type: "federal" | "city" | "county" | "state" | "utility" | "gas_utility" | "other";
+                    /** @description The government agency, company, or organization that offers this program. This generally means the entity that the consumer will interact with to _claim the incentives offered by the program_, as opposed to the entity that sets the program rules, or that provides funding. */
+                    authority?: string;
+                    /** @description What products or services the program can be used on. **NOTE**: we expect to add possible values to this field over time. Client code should gracefully handle unknown values it sees here. */
+                    items?: ("air_sealing" | "air_to_water_heat_pump" | "attic_or_roof_insulation" | "basement_insulation" | "battery_storage_installation" | "central_air_conditioner" | "crawlspace_insulation" | "door_replacement" | "duct_replacement" | "duct_sealing" | "ducted_heat_pump" | "ductless_heat_pump" | "ebike" | "efficiency_rebates" | "electric_outdoor_equipment" | "electric_panel" | "electric_stove" | "electric_thermal_storage_and_slab" | "electric_vehicle_charger" | "electric_wiring" | "energy_audit" | "evaporative_cooler" | "floor_insulation" | "geothermal_heating_installation" | "heat_pump_clothes_dryer" | "heat_pump_water_heater" | "new_electric_vehicle" | "new_plugin_hybrid_vehicle" | "non_heat_pump_clothes_dryer" | "non_heat_pump_water_heater" | "other" | "other_heat_pump" | "other_insulation" | "other_weatherization" | "rooftop_solar_installation" | "smart_thermostat" | "used_electric_vehicle" | "used_plugin_hybrid_vehicle" | "wall_insulation" | "whole_house_fan" | "window_replacement")[];
+                };
             };
         };
-        /**
-         * SupportedUpgrade
-         * @description Upgrades accepted by the REM API.
-         * @enum {string}
-         */
-        SupportedUpgrade: "basic_enclosure" | "min_eff_hp_elec_backup" | "high_eff_hp_elec_backup" | "whole_home_electric_max_eff_basic_enclosure" | "med_eff_hp_hers_sizing_no_setback" | "med_eff_hp_hers_sizing_no_setback_basic_enclosure";
-        /**
-         * HvacEfficiencyElectricDetailed
-         * @description Efficiency standards for electrical HVAC equipment.
-         *
-         *     Whenever we have an efficiency number, we have to know what
-         *     standard of measurement is being used so that we can properly
-         *     interpret the number.
-         *
-         *     Note that this is partitioned from standards used to measure
-         *     efficiency of units using other fuel types (gas, oil, and propane)
-         *     because we want to structure our APIs so that we cannot
-         *     make the mistake of confusing efficiency standards that describe
-         *     the use of different fuels.
-         * @enum {string}
-         */
-        HvacEfficiencyElectricDetailed: "SEER - ENERGY STAR Sept 2015 to present" | "SEER - ENERGY STAR 2006 thru Aug 2015" | "SEER - 2015 or newer (South)" | "SEER - 2015 or newer (North)" | "SEER - 2006 to 2014" | "SEER - 1992 through 2005" | "SEER - Prior to 1992" | "SEER - Mini-split / Ductless (All years)" | "HSPF - ENERGY STAR Sept 2015 to present" | "HSPF - ENERGY STAR 2006 thru Aug 2015" | "HSPF - 2015 or newer" | "HSPF - 2006 to 2014" | "HSPF - 1992 through 2005" | "HSPF - Prior to 1992" | "HSPF - Mini-split / Ductless (All years)" | "EER - Window A/C";
-        /**
-         * HvacEfficiencyNaturalGasOrPropaneDetailed
-         * @description Detailed standards for measuring efficiency for HVAC systems burning natural gas.
-         *
-         *     Note that this is partitioned from standards used to measure
-         *     efficiency of units using other fuel types (electricity, oil, and propane)
-         *     because we want to structure our APIs so that we cannot
-         *     make the mistake of confusing efficiency standards that describe
-         *     the use of different fuels.
-         * @enum {string}
-         */
-        HvacEfficiencyNaturalGasOrPropaneDetailed: "AFUE - Gas/Propane Furnace - Condensing Prior to 2015" | "AFUE - Gas/Propane Furnace - Natural Draft (All Years)" | "AFUE - Gas/Propane Furnace - Induced Draft (All Years)" | "AFUE - Gas/Propane Furnace - North" | "AFUE - Gas/Propane Furnace - South" | "AFUE - Gas/Propane Boiler - ENERGY STAR after Oct 2014" | "AFUE - Gas/Propane Boiler - ENERGY STAR after Oct 2004" | "AFUE - Gas/Propane Boiler - Condensing" | "AFUE - Gas/Propane Boiler - Induced Draft" | "AFUE - Gas/Propane Boiler - Natural Draft";
-        /**
-         * HvacEfficiencyOilDetailed
-         * @description Detailed standards for measuring efficiency for HVAC systems burning oil.
-         *
-         *     Note that this is partitioned from standards used to measure
-         *     efficiency of units using other fuel types (electricity, natural gas, and propane)
-         *     because we want to structure our APIs so that we cannot
-         *     make the mistake of confusing efficiency standards that describe
-         *     the use of different fuels.
-         * @enum {string}
-         */
-        HvacEfficiencyOilDetailed: "AFUE - Oil Furnace - Condensing" | "AFUE - Oil Furnace - ENERGY STAR after Feb 2003" | "AFUE - Oil Furnace - Retention Head Burner" | "AFUE - Oil Furnace - Conventional Burner" | "AFUE - Oil Boiler - ENERGY STAR after Oct 2014" | "AFUE - Oil Boiler - ENERGY STAR after April 2002" | "AFUE - Oil Boiler - After Sept. 2012 (All except ES)" | "AFUE - Oil Boiler - Induced Draft" | "AFUE - Oil Boiler - Natural Draft";
-        /**
-         * HvacUpdateResults
-         * @description The results of a GGRF HVAC upgrade calculation.
-         */
-        HvacUpdateResults: {
-            /** Existing Emissions Tons Co2E */
-            existing_emissions_tons_co2e: number;
-            /** New Unit Emissions Metric Tons Co2E */
-            new_unit_emissions_metric_tons_co2e: number;
-            /** Emissions Reduced Metric Tons Co2E */
-            emissions_reduced_metric_tons_co2e: number;
-        };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
+        APIIncentivesResponse: {
+            incentives: {
+                id: string;
+                items: ("air_sealing" | "air_to_water_heat_pump" | "attic_or_roof_insulation" | "basement_insulation" | "battery_storage_installation" | "central_air_conditioner" | "crawlspace_insulation" | "door_replacement" | "duct_replacement" | "duct_sealing" | "ducted_heat_pump" | "ductless_heat_pump" | "ebike" | "efficiency_rebates" | "electric_outdoor_equipment" | "electric_panel" | "electric_stove" | "electric_thermal_storage_and_slab" | "electric_vehicle_charger" | "electric_wiring" | "energy_audit" | "evaporative_cooler" | "floor_insulation" | "geothermal_heating_installation" | "heat_pump_clothes_dryer" | "heat_pump_water_heater" | "new_electric_vehicle" | "new_plugin_hybrid_vehicle" | "non_heat_pump_clothes_dryer" | "non_heat_pump_water_heater" | "other" | "other_heat_pump" | "other_insulation" | "other_weatherization" | "rooftop_solar_installation" | "smart_thermostat" | "used_electric_vehicle" | "used_plugin_hybrid_vehicle" | "wall_insulation" | "whole_house_fan" | "window_replacement")[];
+                short_description: {
+                    en: string;
+                    es?: string;
+                };
+                start_date?: string;
+                end_date?: string;
+                payment_methods: ("rebate" | "pos_rebate" | "tax_credit" | "account_credit" | "assistance_program" | "performance_rebate" | "unknown")[];
+                amount: {
+                    /** @enum {string} */
+                    type: "dollar_amount" | "percent" | "dollars_per_unit";
+                    number: number;
+                    maximum?: number;
+                    minimum?: number;
+                    unit?: string;
+                };
+                owner_status: ("homeowner" | "renter")[];
+                /** @description Indicates whether this incentive has income eligibility requirements */
+                income_qualified?: boolean;
+                program: string;
+            }[];
+            metadata: {
+                total_incentives: number;
+                total_states: number;
+            };
         };
     };
     responses: never;
@@ -814,6 +443,86 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    "calculator-get": {
+        parameters: {
+            query: {
+                /**
+                 * @description Your zip code helps determine the amount of discounts and tax credits you qualify for.
+                 * @example 80212
+                 */
+                zip: string;
+                /** @description Homeowners and renters qualify for different incentives. */
+                owner_status: "homeowner" | "renter";
+                /**
+                 * @description Enter your gross income (income before taxes). Include wages and salary plus other forms of income, including pensions, interest, dividends, and rental income. If you are married and file jointly, include your spouse’s income.
+                 * @example 80000
+                 */
+                household_income: number;
+                /** @description Select "Head of Household" if you have a child or relative living with you, and you pay more than half the costs of your home. Select "Joint" if you file your taxes as a married couple. */
+                tax_filing: "hoh" | "joint" | "married_filing_separately" | "single" | "qualifying_widower_with_dependent_child";
+                /**
+                 * @description Include anyone you live with who you claim as a dependent on your taxes, and your spouse or partner if you file taxes together.
+                 * @example 2
+                 */
+                household_size: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebsiteCalculatorResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "incentives-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        incentives: components["schemas"]["WebsiteIncentive"][];
+                    };
+                };
+            };
+        };
+    };
     getCalculatedIncentives: {
         parameters: {
             query: {
@@ -822,11 +531,13 @@ export interface operations {
                 /** @description Find incentives that may be available at this address. Exactly one of this and "zip" is required. */
                 address?: string;
                 /** @description Find incentives offered by these types of authorities. If absent, incentives from all types of authorities will be considered. */
-                authority_types?: ("federal" | "city" | "county" | "state" | "utility" | "other")[];
-                /** @description The ID of your utility company, as returned from `/api/v1/utilities`. Required if authority_types includes "utility". If absent, no incentives offered by utilities will be returned. */
+                authority_types?: ("federal" | "city" | "county" | "state" | "utility" | "gas_utility" | "other")[];
+                /** @description The ID of your electric utility company, as returned from `/api/v1/utilities`. Required if authority_types includes "utility". If absent, no incentives offered by electric utilities will be returned. */
                 utility?: string;
+                /** @description The ID of your gas utility company, as returned from `/api/v1/utilities`, or the special string `none` indicating that you do not have gas service. A value other than `none` is required if authority_types includes "gas_utility". If this parameter is absent or `none`, no incentives offered by gas utilities will be returned. In some jurisdictions, your gas utility can affect your eligibility for incentives offered by other authorities; in such cases, if this parameter is absent, incentives with gas-utility-dependent eligibility will _not_ be returned. */
+                gas_utility?: string;
                 /** @description Which types of product or service to fetch incentives for. If absent, include incentives for all products and services. Pass multiple values either comma-separated (`items=new_electric_vehicle,used_electric_vehicle`), or as the same GET parameter multiple times (`items=new_electric_vehicle&items=used_electric_vehicle`), or using empty square bracket notation (`items[]=new_electric_vehicle&items[]=used_electric_vehicle`). */
-                items?: ("air_sealing" | "air_to_water_heat_pump" | "attic_or_roof_insulation" | "basement_insulation" | "battery_storage_installation" | "central_air_conditioner" | "crawlspace_insulation" | "door_replacement" | "duct_replacement" | "duct_sealing" | "ducted_heat_pump" | "ductless_heat_pump" | "ebike" | "efficiency_rebates" | "electric_outdoor_equipment" | "electric_panel" | "electric_stove" | "electric_thermal_storage_and_slab" | "electric_vehicle_charger" | "electric_wiring" | "energy_audit" | "evaporative_cooler" | "floor_insulation" | "geothermal_heating_installation" | "heat_pump_clothes_dryer" | "heat_pump_water_heater" | "new_electric_vehicle" | "new_plugin_hybrid_vehicle" | "non_heat_pump_clothes_dryer" | "non_heat_pump_water_heater" | "other" | "other_heat_pump" | "other_insulation" | "other_weatherization" | "rooftop_solar_installation" | "smart_thermostat" | "used_electric_vehicle" | "used_plugin_hybrid_vehicle" | "wall_insulation" | "whole_house_fan" | "window_replacement" | "heat_pump_air_conditioner_heater" | "weatherization")[];
+                items?: ("air_sealing" | "air_to_water_heat_pump" | "attic_or_roof_insulation" | "basement_insulation" | "battery_storage_installation" | "central_air_conditioner" | "crawlspace_insulation" | "door_replacement" | "duct_replacement" | "duct_sealing" | "ducted_heat_pump" | "ductless_heat_pump" | "ebike" | "efficiency_rebates" | "electric_outdoor_equipment" | "electric_panel" | "electric_stove" | "electric_thermal_storage_and_slab" | "electric_vehicle_charger" | "electric_wiring" | "energy_audit" | "evaporative_cooler" | "floor_insulation" | "geothermal_heating_installation" | "heat_pump_clothes_dryer" | "heat_pump_water_heater" | "new_electric_vehicle" | "new_plugin_hybrid_vehicle" | "non_heat_pump_clothes_dryer" | "non_heat_pump_water_heater" | "other" | "other_heat_pump" | "other_insulation" | "other_weatherization" | "rooftop_solar_installation" | "smart_thermostat" | "used_electric_vehicle" | "used_plugin_hybrid_vehicle" | "wall_insulation" | "whole_house_fan" | "window_replacement")[];
                 /** @description Whether the consumer owns or rents their home. */
                 owner_status: "homeowner" | "renter";
                 /**
@@ -846,13 +557,7 @@ export interface operations {
                 /** @description Option to include states which are in development and not fully launched. */
                 include_beta_states?: boolean;
             };
-            header: {
-                /**
-                 * @description The `Authorization` header is used to authenticate with the API using your API key. Value is of the format `Bearer YOUR_KEY_HERE`.
-                 * @example Bearer YOUR_KEY_HERE
-                 */
-                Authorization: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -888,13 +593,7 @@ export interface operations {
                 /** @description Optional choice of language for user-visible strings. */
                 language?: "en" | "es";
             };
-            header: {
-                /**
-                 * @description The `Authorization` header is used to authenticate with the API using your API key. Value is of the format `Bearer YOUR_KEY_HERE`.
-                 * @example Bearer YOUR_KEY_HERE
-                 */
-                Authorization: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -913,15 +612,58 @@ export interface operations {
                             state: string;
                             /** @description The city name as determined by looking up the ZIP code in our database. */
                             city?: string;
-                            /** @description The county name as determined by looking up the ZIP code in our database. */
-                            county?: string;
+                            /** @description The FIPS code of the county, as determined by looking up the ZIP code in our database. */
+                            county_fips?: string;
                         };
-                        /** @description A map of utility IDs to info about each utility. */
+                        /** @description A map of IDs to info about each electric utility. */
                         utilities: {
                             [key: string]: {
                                 /** @description The customer-facing brand name of the utility. This may differ from the name of the utility's legal entity. */
                                 name?: string;
                             };
+                        };
+                        /** @description A map of IDs to info about each gas utility. If absent, that means we have no information on the gas utilities in the given location. Even if present, may be empty if no gas utilities serve the given location. */
+                        gas_utilities?: {
+                            [key: string]: {
+                                /** @description The customer-facing brand name of the utility. This may differ from the name of the utility's legal entity. */
+                                name?: string;
+                            };
+                        };
+                        /** @description Whether the user's gas utility may affect the set of incentives they are eligible for. This can be because there are gas utilities that offer incentives we track, or because more complex eligibility rules apply in the user's location. */
+                        gas_utility_affects_incentives?: boolean;
+                    };
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getStateStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: {
+                            /** @enum {string} */
+                            status: "launched" | "beta" | "none";
                         };
                     };
                 };
@@ -953,13 +695,7 @@ export interface operations {
                 /** @description Optional choice of language for user-visible strings. */
                 language?: "en" | "es";
             };
-            header: {
-                /**
-                 * @description The `Authorization` header is used to authenticate with the API using your API key. Value is of the format `Bearer YOUR_KEY_HERE`.
-                 * @example Bearer YOUR_KEY_HERE
-                 */
-                Authorization: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1034,90 +770,36 @@ export interface operations {
             };
         };
     };
-    getOpenAPISpec: {
+    getIncentives: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Find incentives available in this state. If not provided, returns incentives from all states. */
+                state?: "AK" | "AL" | "AR" | "AZ" | "CA" | "CO" | "CT" | "DE" | "FL" | "GA" | "HI" | "IA" | "ID" | "IL" | "IN" | "KS" | "KY" | "LA" | "MA" | "MD" | "ME" | "MI" | "MN" | "MO" | "MS" | "MT" | "NC" | "ND" | "NE" | "NH" | "NJ" | "NM" | "NV" | "NY" | "OH" | "OK" | "OR" | "PA" | "RI" | "SC" | "SD" | "TN" | "TX" | "UT" | "VA" | "VT" | "WA" | "WI" | "WV" | "WY" | "DC" | "PR" | "GU" | "MP" | "VI" | "AS";
+                /** @description Optional choice of language for user-visible strings. */
+                language?: "en" | "es";
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
-    };
-    get_by_address: {
-        parameters: {
-            query: {
-                upgrade: components["schemas"]["SupportedUpgrade"];
-                address: string;
-                heating_fuel: components["schemas"]["HeatingFuel"];
-            };
-            header: {
-                /**
-                 * @description The `Authorization` header is used to authenticate with the API using your API key. Value is of the format `Bearer YOUR_KEY_HERE`.
-                 * @example Bearer YOUR_KEY_HERE
-                 */
-                Authorization: string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
         responses: {
-            /** @description Successful Response */
+            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Savings"];
+                    "application/json": components["schemas"]["APIIncentivesResponse"];
                 };
             };
-            /** @description Validation Error */
-            422: {
+            /** @description Default Response */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    query_health_impacts: {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description The `Authorization` header is used to authenticate with the API using your API key. Value is of the format `Bearer YOUR_KEY_HERE`.
-                 * @example Bearer YOUR_KEY_HERE
-                 */
-                Authorization: string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["HealthImpactsArgs"];
-            };
-        };
-        responses: {
-            /** @description A successful response. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HealthImpactsResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
