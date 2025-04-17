@@ -76,6 +76,9 @@ function loadStates(
         0.5,
       ],
     },
+    layout: {
+      visibility: 'none',
+    },
   });
 
   // Find states that have no coverage
@@ -99,14 +102,12 @@ function loadStates(
       ['in', 'ste_name', ...noCoverageStates],
     ],
     paint: {
-      'fill-color': '#6E33CF',
+      'fill-color': '#8F8F8F',
       'fill-outline-color': '#1E1E1E',
-      'fill-opacity': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        1,
-        0.5,
-      ],
+      'fill-opacity': 1,
+    },
+    layout: {
+      visibility: 'visible',
     },
   });
 
@@ -135,7 +136,12 @@ function loadStates(
         0.5,
       ],
     },
+    layout: {
+      visibility: 'none',
+    },
   });
+
+  // TODO: Add layers for incentive numbers on top.
 
   // Add labels for states
   addLabels(map, geojsonData);
@@ -180,6 +186,16 @@ function loadStates(
   // On click, call the passed callback to select a state
   map.on('click', 'states-layer', e => {
     if (e.features && e.features.length > 0 && onStateSelect) {
+      // check if clicked state is uncovered
+      const clickedState = e.features[0].properties.ste_name;
+      const isUncovered = noCoverageStates.includes(clickedState);
+
+      // If the clicked state is uncovered, do not select it
+      if (isUncovered) {
+        return;
+      }
+
+      // If the clicked state is covered, select it
       const feature = e.features[0];
       onStateSelect(feature);
       setTimeout(() => {
@@ -203,4 +219,25 @@ function zoomToState(
   });
 }
 
-export { loadStates, zoomToState };
+function updateStatesVisibility(map: maplibregl.Map, visible: boolean) {
+  // exclude no coverage, because we don't show
+  // TODO: add layers for incentives
+  const layerIds = [
+    'states-coverage-layer',
+    'states-beta-layer',
+  ];
+  const visibility = visible ? 'visible' : 'none';
+
+  layerIds.forEach(id => {
+    if (!map.getLayer(id)) {
+      return;
+    }
+    map.setLayoutProperty(id, 'visibility', visibility);
+  });
+}
+
+function resetStateSelection() {
+  isStateSelected = false;
+}
+
+export { loadStates, resetStateSelection, updateStatesVisibility, zoomToState };

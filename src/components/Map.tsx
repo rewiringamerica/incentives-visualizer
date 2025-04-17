@@ -1,11 +1,12 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../styles/index.css';
 import { loadCounties } from './Counties';
 import Legend from './Legend';
 import MapHighlights from './MapHighlights';
-import { loadStates } from './States';
+import { loadStates, updateStatesVisibility } from './States';
+import Toggle from './Toggle';
 
 interface MapProps {
   onStateSelect?: (feature: maplibregl.MapGeoJSONFeature) => void;
@@ -14,6 +15,7 @@ interface MapProps {
   onMapSet: React.Dispatch<React.SetStateAction<maplibregl.Map | null>>;
   selectedState: maplibregl.MapGeoJSONFeature | null;
   selectedCounty: maplibregl.MapGeoJSONFeature | null;
+  isVisible: boolean;
 }
 
 const Map: React.FC<MapProps> = ({
@@ -25,6 +27,7 @@ const Map: React.FC<MapProps> = ({
   selectedCounty,
 }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const STYLE_VERSION = 8; // Required for declaring a style, may change in the future
 
   useEffect(() => {
@@ -58,10 +61,17 @@ const Map: React.FC<MapProps> = ({
     return () => map.remove();
   }, [onStateSelect, onCountySelect, onMapSet]);
 
+  useEffect(() => {
+    if (mapInstance) {
+      updateStatesVisibility(mapInstance, isVisible);
+    }
+  }, [mapInstance, isVisible]);
+
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
-      <Legend map={mapInstance} />
+      <Toggle map={mapInstance} isVisible={isVisible} onToggle={setIsVisible} />
+      <Legend map={mapInstance} isVisible={isVisible} />
       <MapHighlights
         map={mapInstance}
         selectedState={selectedState}
