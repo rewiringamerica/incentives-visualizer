@@ -1,6 +1,7 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import React, { useEffect, useRef } from 'react';
+import { env } from '../lib/env';
 import '../styles/index.css';
 import { loadCounties } from './Counties';
 import Legend from './Legend';
@@ -31,14 +32,14 @@ const Map: React.FC<MapProps> = ({
     if (!mapContainer.current) {
       return;
     }
-    const API_KEY = process.env.MAPTILER_API_KEY;
+
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: {
         version: STYLE_VERSION,
         sources: {},
         layers: [],
-        glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${API_KEY}`,
+        glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${env.MAPTILER_API_KEY}`,
       },
       center: [0, 0],
       zoom: 4.2,
