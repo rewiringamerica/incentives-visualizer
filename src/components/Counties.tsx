@@ -7,6 +7,7 @@ const COUNTY_LABEL_ID = 'county-labels-layer';
 function loadCounties(
   map: maplibregl.Map,
   onCountySelect?: (feature: maplibregl.MapGeoJSONFeature) => void,
+  selectedFeature?: maplibregl.MapGeoJSONFeature | null,
 ) {
   // Process county names to handle array format
   (countyData as GeoJSON.FeatureCollection).features.forEach(feature => {
@@ -34,6 +35,12 @@ function loadCounties(
     type: 'fill',
     source: 'countiesData',
     minzoom: 6,
+    filter: selectedFeature
+      ? [
+          'all',
+          ['==', ['get', 'ste_name'], selectedFeature.properties?.ste_name],
+        ]
+      : ['all'],
     paint: {
       'fill-color': '#F9D65B',
       'fill-outline-color': '#1E1E1E',

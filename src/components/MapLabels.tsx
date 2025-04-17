@@ -2,7 +2,7 @@ import * as turf from '@turf/turf';
 import { FeatureCollection } from 'geojson';
 import maplibregl from 'maplibre-gl';
 
-const LABEL_LAYER_ID = 'dynamic-labels-layer';
+const LABEL_LAYER_ID = 'state-labels-layer';
 
 interface LabelData {
   name: string;

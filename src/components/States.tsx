@@ -8,6 +8,7 @@ import { addLabels } from './MapLabels';
 function loadStates(
   map: maplibregl.Map,
   onStateSelect?: (feature: maplibregl.MapGeoJSONFeature) => void,
+  selectedFeature?: maplibregl.MapGeoJSONFeature | null,
 ) {
   (geojsonData as GeoJSON.FeatureCollection).features.forEach(feature => {
     if (feature.properties) {
@@ -34,6 +35,12 @@ function loadStates(
     type: 'fill',
     source: 'statesData',
     maxzoom: 6,
+    filter: selectedFeature
+      ? [
+          'all',
+          ['!=', ['get', 'ste_name'], selectedFeature.properties?.ste_name],
+        ]
+      : ['all'],
     paint: {
       'fill-color': '#FCF6E1',
       'fill-outline-color': '#1E1E1E',
