@@ -58,8 +58,8 @@ const Map: React.FC<MapProps> = ({
 
     map.on('load', () => {
       // Load states and pass the onStateSelect callback so a state click will notify the parent.
-      loadCounties(map, onCountySelect, selectedState || selectedCounty);
-      loadStates(map, onStateSelect, selectedState || selectedCounty);
+      loadCounties(map, onCountySelect);
+      loadStates(map, onStateSelect);
       onMapSet(map);
     });
 
@@ -69,6 +69,130 @@ const Map: React.FC<MapProps> = ({
 
     return () => map.remove();
   }, [onStateSelect, onCountySelect, onMapSet]);
+
+  const addFilterToSpec = (
+    existingFilter: maplibregl.FilterSpecification | void,
+    newFilter: maplibregl.FilterSpecification,
+  ) => {
+    if (!existingFilter) {
+      return newFilter;
+    }
+
+    if (
+      Array.isArray(existingFilter) &&
+      existingFilter[0] === 'in' &&
+      existingFilter[1] === 'ste_name'
+    ) {
+      existingFilter = [
+        'in',
+        ['get', 'ste_name'],
+        ...existingFilter.slice(2),
+      ] as unknown as maplibregl.FilterSpecification;
+    }
+
+    if (Array.isArray(existingFilter) && existingFilter[0] === 'all') {
+      const convertedFilters = existingFilter.slice(1).map(f => {
+        if (Array.isArray(f) && f[0] === 'in' && f[1] === 'ste_name') {
+          return [
+            'in',
+            ['get', 'ste_name'],
+            ...f.slice(2),
+          ] as unknown as maplibregl.FilterSpecification;
+        }
+        return f as maplibregl.FilterSpecification;
+      });
+      return [
+        'all',
+        ...convertedFilters,
+        newFilter,
+      ] as maplibregl.FilterSpecification;
+    }
+
+    return ['all', existingFilter, newFilter] as maplibregl.FilterSpecification;
+  };
+
+  const removeSelectionFilters = (
+    filter: maplibregl.FilterSpecification | void,
+  ): maplibregl.FilterSpecification | null => {
+    if (!filter) {return null;}
+    const isSelectionFilter = (f: maplibregl.FilterSpecification) => {
+      return (
+        Array.isArray(f) &&
+        f.length === 3 &&
+        (f[0] === '==' || f[0] === '!=') &&
+        Array.isArray(f[1]) &&
+        f[1][0] === 'get' &&
+        f[1][1] === 'ste_name'
+      );
+    };
+
+    if (Array.isArray(filter) && filter[0] === 'all') {
+      const remainingFilters = filter
+        .slice(1)
+        .filter(f => !isSelectionFilter(f as maplibregl.FilterSpecification));
+      return remainingFilters.length > 0
+        ? (['all', ...remainingFilters] as maplibregl.FilterSpecification)
+        : null;
+    }
+
+    if (isSelectionFilter(filter)) {
+      return null;
+    }
+
+    return filter;
+  };
+
+  useEffect(() => {
+    if (!mapInstance) {return;}
+
+    const currentStateName =
+      selectedState?.properties?.ste_name ||
+      selectedCounty?.properties?.ste_name;
+
+    // Update state layers
+    [
+      'states-layer',
+      'states-coverage-layer',
+      'states-no-coverage-layer',
+      'states-beta-layer',
+      'state-labels-layer',
+    ].forEach(layerId => {
+      let currentFilter = mapInstance.getFilter(layerId);
+      mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
+      currentFilter = mapInstance.getFilter(layerId);
+
+      if (currentStateName) {
+        const newFilter = [
+          '!=',
+          ['get', 'ste_name'],
+          currentStateName,
+        ] as maplibregl.FilterSpecification;
+        mapInstance.setFilter(
+          layerId,
+          addFilterToSpec(currentFilter, newFilter),
+        );
+      }
+    });
+
+    // Update county layers
+    ['counties-layer', 'county-labels-layer'].forEach(layerId => {
+      let currentFilter = mapInstance.getFilter(layerId);
+      mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
+      currentFilter = mapInstance.getFilter(layerId);
+
+      if (currentStateName) {
+        const newFilter = [
+          '==',
+          ['get', 'ste_name'],
+          currentStateName,
+        ] as maplibregl.FilterSpecification;
+        mapInstance.setFilter(
+          layerId,
+          addFilterToSpec(currentFilter, newFilter),
+        );
+      }
+    });
+  }, [mapInstance, selectedState, selectedCounty]);
 
   const handleZoomOut = () => {
     if (!mapInstance) {return;}

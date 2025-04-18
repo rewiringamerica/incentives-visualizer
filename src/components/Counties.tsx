@@ -7,7 +7,6 @@ const COUNTY_LABEL_ID = 'county-labels-layer';
 function loadCounties(
   map: maplibregl.Map,
   onCountySelect?: (feature: maplibregl.MapGeoJSONFeature) => void,
-  selectedFeature?: maplibregl.MapGeoJSONFeature | null,
 ) {
   // Process county names to handle array format
   (countyData as GeoJSON.FeatureCollection).features.forEach(feature => {
@@ -35,12 +34,6 @@ function loadCounties(
     type: 'fill',
     source: 'countiesData',
     minzoom: 6,
-    filter: selectedFeature
-      ? [
-          'all',
-          ['==', ['get', 'ste_name'], selectedFeature.properties?.ste_name],
-        ]
-      : ['all'],
     paint: {
       'fill-color': '#F9D65B',
       'fill-outline-color': '#1E1E1E',
@@ -61,6 +54,7 @@ function loadCounties(
       }
 
       const name = feature.properties?.coty_name;
+      const state = feature.properties?.ste_name;
       const center = turf.centerOfMass(feature).geometry.coordinates;
 
       return {
@@ -70,7 +64,8 @@ function loadCounties(
           coordinates: center,
         },
         properties: {
-          name: Array.isArray(name) ? name[0] : name,
+          coty_name: Array.isArray(name) ? name[0] : name,
+          ste_name: Array.isArray(state) ? state[0] : state,
         },
       };
     })
@@ -96,7 +91,7 @@ function loadCounties(
       source: COUNTY_LABEL_ID,
       minzoom: 6,
       layout: {
-        'text-field': ['get', 'name'],
+        'text-field': ['get', 'coty_name'],
         'text-size': 9,
         'text-anchor': 'center',
       },

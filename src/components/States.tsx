@@ -8,7 +8,6 @@ import { addLabels } from './MapLabels';
 function loadStates(
   map: maplibregl.Map,
   onStateSelect?: (feature: maplibregl.MapGeoJSONFeature) => void,
-  selectedFeature?: maplibregl.MapGeoJSONFeature | null,
 ) {
   (geojsonData as GeoJSON.FeatureCollection).features.forEach(feature => {
     if (feature.properties) {
@@ -34,13 +33,6 @@ function loadStates(
     id: 'states-layer',
     type: 'fill',
     source: 'statesData',
-    maxzoom: 6,
-    filter: selectedFeature
-      ? [
-          'all',
-          ['!=', ['get', 'ste_name'], selectedFeature.properties?.ste_name],
-        ]
-      : ['all'],
     paint: {
       'fill-color': '#FCF6E1',
       'fill-outline-color': '#1E1E1E',
@@ -68,10 +60,9 @@ function loadStates(
     id: 'states-coverage-layer',
     type: 'fill',
     source: 'statesData',
-    maxzoom: 6,
     filter: [
       'all',
-      ['in', 'ste_name', ...coverageStates],
+      ['in', ['get', 'ste_name'], ['literal', coverageStates]],
     ],
     paint: {
       'fill-color': '#F9D65B',
@@ -100,10 +91,9 @@ function loadStates(
     id: 'states-no-coverage-layer',
     type: 'fill',
     source: 'statesData',
-    maxzoom: 6,
     filter: [
       'all',
-      ['in', 'ste_name', ...noCoverageStates],
+      ['in', ['get', 'ste_name'], ['literal', noCoverageStates]],
     ],
     paint: {
       'fill-color': '#6E33CF',
@@ -127,10 +117,10 @@ function loadStates(
     id: 'states-beta-layer',
     type: 'fill',
     source: 'statesData',
-    maxzoom: 6,
+    //maxzoom: 6,
     filter: [
       'all',
-      ['in', 'ste_name', ...betaStates],
+      ['in', ['get', 'ste_name'], ['literal', betaStates]],
     ],
     paint: {
       'fill-color': '#71C4CB',
