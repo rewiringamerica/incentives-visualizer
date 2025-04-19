@@ -114,7 +114,9 @@ const Map: React.FC<MapProps> = ({
   const removeSelectionFilters = (
     filter: maplibregl.FilterSpecification | void,
   ): maplibregl.FilterSpecification | null => {
-    if (!filter) {return null;}
+    if (!filter) {
+      return null;
+    }
     const isSelectionFilter = (f: maplibregl.FilterSpecification) => {
       return (
         Array.isArray(f) &&
@@ -143,7 +145,9 @@ const Map: React.FC<MapProps> = ({
   };
 
   useEffect(() => {
-    if (!mapInstance) {return;}
+    if (!mapInstance) {
+      return;
+    }
 
     const currentStateName =
       selectedState?.properties?.ste_name ||
@@ -195,7 +199,9 @@ const Map: React.FC<MapProps> = ({
   }, [mapInstance, selectedState, selectedCounty]);
 
   const handleZoomOut = () => {
-    if (!mapInstance) {return;}
+    if (!mapInstance) {
+      return;
+    }
 
     let targetZoom = 4.2; // Default to national view
     if (currentZoom >= 8) {
