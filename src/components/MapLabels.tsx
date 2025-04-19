@@ -2,7 +2,7 @@ import * as turf from '@turf/turf';
 import { FeatureCollection } from 'geojson';
 import maplibregl from 'maplibre-gl';
 
-const LABEL_LAYER_ID = 'dynamic-labels-layer';
+const LABEL_LAYER_ID = 'state-labels-layer';
 
 interface LabelData {
   name: string;
@@ -60,7 +60,7 @@ export function addLabels(map: maplibregl.Map, geojsonData: FeatureCollection) {
         coordinates: label.coordinates,
       },
       properties: {
-        name: label.name,
+        ste_name: label.name,
       },
     })),
   };
@@ -74,9 +74,8 @@ export function addLabels(map: maplibregl.Map, geojsonData: FeatureCollection) {
     id: LABEL_LAYER_ID,
     type: 'symbol',
     source: LABEL_LAYER_ID,
-    maxzoom: 6,
     layout: {
-      'text-field': ['get', 'name'],
+      'text-field': ['get', 'ste_name'],
       'text-size': 10,
       'text-anchor': 'center',
     },
