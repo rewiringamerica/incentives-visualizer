@@ -1,6 +1,6 @@
 import { IconButton } from '@mui/material';
 import { FC } from 'react';
-import { UpRightArrow } from './icons';
+import { MagnifyingGlassMinus } from './icons';
 
 interface ZoomControlsProps {
   onZoomOut: () => void;
@@ -15,7 +15,7 @@ const ZoomControls: FC<ZoomControlsProps> = ({ onZoomOut }) => {
           className="hover:bg-gray-100"
           aria-label="zoom out"
         >
-          <UpRightArrow w={24} h={24} />
+          <MagnifyingGlassMinus w={24} h={24} />
         </IconButton>
       </div>
     </div>

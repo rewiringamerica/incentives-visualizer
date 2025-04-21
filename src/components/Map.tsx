@@ -44,8 +44,8 @@ const Map: React.FC<MapProps> = ({
       center: [0, 0],
       zoom: 4.2,
       maxBounds: [
-        [-30, -15], // Southwest corner, Mainland USA
-        [30, 15], // Northeast corner, Mainland USA
+        [-30, -20], // Southwest corner, Mainland USA
+        [30, 20], // Northeast corner, Mainland USA
       ],
       interactive: true,
       dragPan: true,
@@ -239,13 +239,13 @@ const Map: React.FC<MapProps> = ({
         zoom: targetZoom,
         essential: true,
       });
-    }, 10);
+    }, 30);
   };
 
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
-      <ZoomControls onZoomOut={handleZoomOut} />
+      {currentZoom > 4.2 && <ZoomControls onZoomOut={handleZoomOut} />}
       <Legend map={mapInstance} />
       <MapHighlights
         map={mapInstance}
