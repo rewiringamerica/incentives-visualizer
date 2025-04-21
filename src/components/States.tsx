@@ -1,8 +1,12 @@
 import * as turf from '@turf/turf';
 import maplibregl from 'maplibre-gl';
-import { STATE_ABBREVIATION_TO_NAME } from '../data/abbrevsToFull';
+import {
+  STATE_ABBREVIATION_TO_NAME,
+  STATE_NAME_TO_ABBREVIATION,
+} from '../data/abbrevsToFull';
 import geojsonData from '../data/geojson/states-albers.json';
 import { BETA_STATES, LAUNCHED_STATES, STATES_PLUS_DC } from '../data/states';
+import { $api } from '../lib/api';
 import { addLabels } from './MapLabels';
 
 function loadStates(
@@ -28,7 +32,7 @@ function loadStates(
 
   // Color options: #fcf6e1, #F9D65B, #71c4cb, #6e33cf
 
-  // Add a states layer; adjust the filter as needed for state boundaries
+  // Add a layer for all states
   map.addLayer({
     id: 'states-layer',
     type: 'fill',
@@ -45,6 +49,8 @@ function loadStates(
       ],
     },
   });
+
+  // Adding layers for the coverage
 
   // Add a layer for the covered states
   const coverageStatesAbb = STATES_PLUS_DC.filter(state =>
@@ -91,26 +97,6 @@ function loadStates(
     stateAbb => STATE_ABBREVIATION_TO_NAME[stateAbb],
   );
 
-  // Add layer for states with no coverage
-  map.addLayer({
-    id: 'states-no-coverage-layer',
-    type: 'fill',
-    source: 'statesData',
-    maxzoom: 6,
-    filter: [
-      'all',
-      ['in', 'ste_name', ...noCoverageStates],
-    ],
-    paint: {
-      'fill-color': '#8F8F8F',
-      'fill-outline-color': '#1E1E1E',
-      'fill-opacity': 1,
-    },
-    layout: {
-      visibility: 'visible',
-    },
-  });
-
   // convert beta states to full names
   const betaStates = BETA_STATES.map(
     stateAbb => STATE_ABBREVIATION_TO_NAME[stateAbb],
@@ -138,6 +124,73 @@ function loadStates(
     },
     layout: {
       visibility: 'none',
+    },
+  });
+
+  // Add layers for incentives numbers
+
+  // get states with 1-10 incentives
+  // query all states to get their incentive number
+
+  // put incentives with 1-10 in this array
+  const incentives1to10 = [];
+  // put incentives with 11-20 in this array
+  const incentives11to20 = [];
+  // put incentives with 20+ in this array
+  const incentives20Plus = [];
+
+  // for each state geo feature ste_name
+  // try catch
+  try {
+    for (const feature of geojsonData.features) {
+      if (feature.properties?.ste_name) {
+        // query for incentives
+        const incentives = $api.useQuery('get', '/api/v1/incentives', {
+          params: {
+            query: {
+              state: feature?.properties?.ste_name
+                ? STATE_NAME_TO_ABBREVIATION[feature?.properties?.ste_name]
+                : undefined,
+            },
+          },
+        });
+
+        // get the number of incentives
+        const incentiveCount =
+          incentives.data?.incentives[0]?.items.length ?? 0;
+
+        if (incentiveCount > 0) {
+          if (incentiveCount <= 10) {
+            incentives1to10.push(feature.properties.ste_name);
+          } else if (incentiveCount <= 20) {
+            incentives11to20.push(feature.properties.ste_name);
+          } else {
+            incentives20Plus.push(feature.properties.ste_name);
+          }
+        }
+      }
+    }
+  } catch {
+    console.log('Error fetching incentives');
+  }
+
+  // Add layer for states with no coverage, always on top
+  map.addLayer({
+    id: 'states-no-coverage-layer',
+    type: 'fill',
+    source: 'statesData',
+    maxzoom: 6,
+    filter: [
+      'all',
+      ['in', 'ste_name', ...noCoverageStates],
+    ],
+    paint: {
+      'fill-color': '#8F8F8F',
+      'fill-outline-color': '#1E1E1E',
+      'fill-opacity': 1,
+    },
+    layout: {
+      visibility: 'visible',
     },
   });
 

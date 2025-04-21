@@ -81,6 +81,7 @@ const Toggle: React.FC<ToggleProps> = ({ map, isVisible, onToggle }) => {
             flex: 1,
             fontSize: '14px',
             textAlign: 'center',
+            marginLeft: '10px',
             fontWeight: isVisible ? 'bold' : 'normal',
             color: isVisible ? '#1E1E1E' : 'white',
             zIndex: 1,
