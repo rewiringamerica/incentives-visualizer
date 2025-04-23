@@ -54,6 +54,7 @@ function loadCounties(
       }
 
       const name = feature.properties?.coty_name;
+      const state = feature.properties?.ste_name;
       const center = turf.centerOfMass(feature).geometry.coordinates;
 
       return {
@@ -63,7 +64,8 @@ function loadCounties(
           coordinates: center,
         },
         properties: {
-          name: Array.isArray(name) ? name[0] : name,
+          coty_name: Array.isArray(name) ? name[0] : name,
+          ste_name: Array.isArray(state) ? state[0] : state,
         },
       };
     })
@@ -89,7 +91,7 @@ function loadCounties(
       source: COUNTY_LABEL_ID,
       minzoom: 6,
       layout: {
-        'text-field': ['get', 'name'],
+        'text-field': ['get', 'coty_name'],
         'text-size': 9,
         'text-anchor': 'center',
       },
