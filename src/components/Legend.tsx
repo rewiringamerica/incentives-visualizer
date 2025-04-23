@@ -79,10 +79,6 @@ class CustomLegendControl {
       'fill-opacity',
     );
 
-    if (!fillColorCoverage) {
-      return;
-    }
-
     // if at county zoom level, show different legend
     const zoom = this._map.getZoom();
     const isCountyZoom = zoom >= 6;
@@ -92,6 +88,7 @@ class CustomLegendControl {
     let label1 = '';
     let label2 = '';
     let label3 = '';
+    let label4 = '';
 
     // if on county view, show county labels
     if (isCountyZoom) {
@@ -104,9 +101,28 @@ class CustomLegendControl {
       label2 = 'Coming Soon';
       label3 = 'Not Supported';
     } else {
-      label1 = '10-20 Incentives';
-      label2 = '1-9 Incentives';
+      label1 = '60+ Incentives';
+      label2 = '21-60 Incentives';
       label3 = 'No Incentives';
+      label4 = '0-20 Incentives';
+    }
+
+    let incentiveLow = '';
+
+    // if on incentive view, add extra label with color box for incentive-lo-layer
+    if (!this._isVisible) {
+      incentiveLow = `
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+        <span style="
+          width: 20px; height: 20px; 
+          background: #6E33CF; 
+          opacity: ${fillOpacityCoverage};
+          border: 2px solid ${outlineColor || 'black'}; 
+          margin-right: 5px; display: inline-block;">
+        </span>
+        <span>${label4}</span>
+      </div>
+      `;
     }
 
     this._container.innerHTML = `
@@ -131,6 +147,7 @@ class CustomLegendControl {
           </span>
           <span>${label2}</span>
         </div>
+        ${incentiveLow}
         <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
           <span style="
             width: 20px; height: 20px; 

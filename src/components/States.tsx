@@ -11,6 +11,7 @@ import { addLabels } from './MapLabels';
 
 function loadStates(
   map: maplibregl.Map,
+  queryClient: QueryClient,
   onStateSelect?: (feature: maplibregl.MapGeoJSONFeature) => void,
 ) {
   (geojsonData as GeoJSON.FeatureCollection).features.forEach(feature => {
@@ -130,47 +131,135 @@ function loadStates(
   // get states with 1-10 incentives
   // query all states to get their incentive number
 
-  // put incentives with 1-10 in this array
-  const incentives1to10 = [];
-  // put incentives with 11-20 in this array
-  const incentives11to20 = [];
-  // put incentives with 20+ in this array
-  const incentives20Plus = [];
+  // put low incentives in this array
+  const incentivesLow: string[] = [];
+  // put med incentives in this array
+  const incentivesMed: string[] = [];
+  // put hi incentives in this array
+  const incentivesHi: string[] = [];
 
   // for each state geo feature ste_name
-  // try catch
-  try {
+  (async () => {
     for (const feature of geojsonData.features) {
-      if (feature.properties?.ste_name) {
-        // query for incentives
-        const incentives = $api.useQuery('get', '/api/v1/incentives', {
-          params: {
-            query: {
-              state: feature?.properties?.ste_name
-                ? STATE_NAME_TO_ABBREVIATION[feature?.properties?.ste_name]
-                : undefined,
+      const stateName = feature.properties?.ste_name;
+      const stateAbbr = stateName
+        ? STATE_NAME_TO_ABBREVIATION[stateName]
+        : null;
+
+      if (!stateAbbr) {continue;}
+
+      try {
+        const incentives = await queryClient.fetchQuery(
+          $api.queryOptions('get', '/api/v1/incentives', {
+            params: {
+              query: {
+                state:
+                  STATE_NAME_TO_ABBREVIATION[feature?.properties?.ste_name],
+              },
             },
-          },
-        });
+          }),
+        );
 
-        // get the number of incentives
-        const incentiveCount =
-          incentives.data?.incentives[0]?.items.length ?? 0;
-
-        if (incentiveCount > 0) {
-          if (incentiveCount <= 10) {
-            incentives1to10.push(feature.properties.ste_name);
-          } else if (incentiveCount <= 20) {
-            incentives11to20.push(feature.properties.ste_name);
-          } else {
-            incentives20Plus.push(feature.properties.ste_name);
-          }
+        if (!incentives) {
+          console.error(`No data for ${stateName}`);
+          continue;
         }
+
+        const count = incentives.incentives?.length || 0;
+
+        if (count <= 20) {
+          incentivesLow.push(stateName);
+        } else if (count <= 60) {
+          incentivesMed.push(stateName);
+        } else if (count > 60) {
+          incentivesHi.push(stateName);
+        }
+      } catch (err) {
+        console.error(`Error fetching for ${stateAbbr}:`, err);
       }
     }
-  } catch {
-    console.log('Error fetching incentives');
-  }
+
+    // Add layer for states with 1-10 incentives
+    map.addLayer({
+      id: 'states-incentives-low-layer',
+      type: 'fill',
+      source: 'statesData',
+      filter: [
+        'all',
+        ['in', 'ste_name', ...incentivesLow],
+      ],
+      paint: {
+        'fill-color': '#6E33CF',
+        'fill-outline-color': '#1E1E1E',
+        'fill-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          1,
+          0.5,
+        ],
+      },
+      layout: {
+        visibility: 'visible',
+      },
+    });
+
+    // Add layer for states with 11-20 incentives
+    map.addLayer({
+      id: 'states-incentives-med-layer',
+      type: 'fill',
+      source: 'statesData',
+      filter: [
+        'all',
+        ['in', 'ste_name', ...incentivesMed],
+      ],
+      paint: {
+        'fill-color': '#71C4CB',
+        'fill-outline-color': '#1E1E1E',
+        'fill-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          1,
+          0.5,
+        ],
+      },
+      layout: {
+        visibility: 'visible',
+      },
+    });
+
+    // Add layer for states with 11-20 incentives
+    map.addLayer({
+      id: 'states-incentives-hi-layer',
+      type: 'fill',
+      source: 'statesData',
+      filter: [
+        'all',
+        ['in', 'ste_name', ...incentivesHi],
+      ],
+      paint: {
+        'fill-color': '#F9D65B',
+        'fill-outline-color': '#1E1E1E',
+        'fill-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          1,
+          0.5,
+        ],
+      },
+      layout: {
+        visibility: 'visible',
+      },
+    });
+
+    // move incentives layers to the bottom
+    map.moveLayer('states-incentives-low-layer', 'states-coverage-layer');
+    map.moveLayer('states-incentives-med-layer', 'states-coverage-layer');
+    map.moveLayer('states-incentives-hi-layer', 'states-coverage-layer');
+
+    // move county labels on top
+    map.moveLayer('counties-layer');
+    map.moveLayer('county-labels-layer');
+  })();
 
   // Add layer for states with no coverage, always on top
   map.addLayer({
@@ -191,8 +280,6 @@ function loadStates(
       visibility: 'visible',
     },
   });
-
-  // TODO: Add layers for incentive numbers on top.
 
   // Add labels for states
   addLabels(map, geojsonData);
@@ -273,17 +360,32 @@ function zoomToState(
 function updateStatesVisibility(map: maplibregl.Map, visible: boolean) {
   // exclude no coverage, because we don't show
   // TODO: add layers for incentives
-  const layerIds = [
+  const coverageLayerIds = [
     'states-coverage-layer',
     'states-beta-layer',
   ];
-  const visibility = visible ? 'visible' : 'none';
 
-  layerIds.forEach(id => {
+  const incentivesLayerIds = [
+    'states-incentives-low-layer',
+    'states-incentives-med-layer',
+    'states-incentives-hi-layer',
+  ];
+
+  const coverageVisibility = visible ? 'visible' : 'none';
+  const incentivesVisibility = visible ? 'none' : 'visible';
+
+  coverageLayerIds.forEach(id => {
     if (!map.getLayer(id)) {
       return;
     }
-    map.setLayoutProperty(id, 'visibility', visibility);
+    map.setLayoutProperty(id, 'visibility', coverageVisibility);
+  });
+
+  incentivesLayerIds.forEach(id => {
+    if (!map.getLayer(id)) {
+      return;
+    }
+    map.setLayoutProperty(id, 'visibility', incentivesVisibility);
   });
 }
 
