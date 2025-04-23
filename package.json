@@ -31,7 +31,8 @@
     "openapi-react-query": "^0.3.0",
     "parcel": "^2.13.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.1",
