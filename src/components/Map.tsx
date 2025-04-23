@@ -168,7 +168,6 @@ const Map: React.FC<MapProps> = ({
       'states-coverage-layer',
       'states-no-coverage-layer',
       'states-beta-layer',
-      'state-labels-layer',
     ].forEach(layerId => {
       let currentFilter = mapInstance.getFilter(layerId);
       mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));

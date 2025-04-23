@@ -110,9 +110,9 @@ class CustomLegendControl {
     let incentiveLow = '';
 
     // if on incentive view, add extra label with color box for incentive-lo-layer
-    if (!this._isVisible) {
+    if (!this._isVisible && !isCountyZoom) {
       incentiveLow = `
-        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 120px; margin-bottom: 5px; font-size: 14px;">
         <span style="
           width: 20px; height: 20px; 
           background: #6E33CF; 
@@ -126,8 +126,8 @@ class CustomLegendControl {
     }
 
     this._container.innerHTML = `
-      <strong>Legend</strong>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+      <strong style="font-size: 14px">Legend</strong>
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 140px; margin-bottom: 5px; font-size: 14px;">
         <span style="
           width: 20px; height: 20px; 
           background: ${fillColorCoverage}; 
@@ -137,7 +137,7 @@ class CustomLegendControl {
         </span>
         <span>${label1}</span>
       </div>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
+      <div style="display: flex; align-items: center; margin-top: 5px; width: 140px; margin-bottom: 5px; font-size: 14px;">
         <span style="
             width: 20px; height: 20px; 
             background: ${fillColorBeta}; 
@@ -148,7 +148,7 @@ class CustomLegendControl {
           <span>${label2}</span>
         </div>
         ${incentiveLow}
-        <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 120px; font-size: 14px;">
           <span style="
             width: 20px; height: 20px; 
             background: ${fillColorNoCoverage}; 
