@@ -1,7 +1,7 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { env } from '../lib/env';
 import React, { useEffect, useRef, useState } from 'react';
+import { env } from '../lib/env';
 import '../styles/index.css';
 import { loadCounties } from './Counties';
 import Legend from './Legend';
