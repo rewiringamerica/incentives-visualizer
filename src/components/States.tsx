@@ -146,7 +146,9 @@ function loadStates(
         ? STATE_NAME_TO_ABBREVIATION[stateName]
         : null;
 
-      if (!stateAbbr) {continue;}
+      if (!stateAbbr) {
+        continue;
+      }
 
       try {
         const incentives = await queryClient.fetchQuery(
