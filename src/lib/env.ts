@@ -5,4 +5,7 @@ const schema = z.object({
   MAPTILER_API_KEY: z.string(),
 });
 
-export const env = schema.parse(process.env);
+export const env = schema.parse({
+  API_URL: process.env.API_URL,
+  MAPTILER_API_KEY: process.env.MAPTILER_API_KEY,
+});
