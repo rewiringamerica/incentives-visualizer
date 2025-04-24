@@ -163,47 +163,56 @@ const Map: React.FC<MapProps> = ({
       selectedCounty?.properties?.ste_name;
 
     // Update state layers
-    [
-      'states-layer',
-      'states-coverage-layer',
-      'states-no-coverage-layer',
-      'states-beta-layer',
-    ].forEach(layerId => {
-      let currentFilter = mapInstance.getFilter(layerId);
-      mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
-      currentFilter = mapInstance.getFilter(layerId);
+    mapInstance
+      .getStyle()
+      .layers.filter(
+        layer =>
+          layer.id.startsWith('states-') || layer.id.startsWith('state-'),
+      )
+      .forEach(layer => {
+        const layerId = layer.id;
+        let currentFilter = mapInstance.getFilter(layerId);
+        mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
+        currentFilter = mapInstance.getFilter(layerId);
 
-      if (currentStateName) {
-        const newFilter = [
-          '!=',
-          ['get', 'ste_name'],
-          currentStateName,
-        ] as maplibregl.FilterSpecification;
-        mapInstance.setFilter(
-          layerId,
-          addFilterToSpec(currentFilter, newFilter),
-        );
-      }
-    });
+        if (currentStateName) {
+          const newFilter = [
+            '!=',
+            ['get', 'ste_name'],
+            currentStateName,
+          ] as maplibregl.FilterSpecification;
+          mapInstance.setFilter(
+            layerId,
+            addFilterToSpec(currentFilter, newFilter),
+          );
+        }
+      });
 
     // Update county layers
-    ['counties-layer', 'county-labels-layer'].forEach(layerId => {
-      let currentFilter = mapInstance.getFilter(layerId);
-      mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
-      currentFilter = mapInstance.getFilter(layerId);
+    mapInstance
+      .getStyle()
+      .layers.filter(
+        layer =>
+          layer.id.startsWith('counties-') || layer.id.startsWith('county-'),
+      )
+      .forEach(layer => {
+        const layerId = layer.id;
+        let currentFilter = mapInstance.getFilter(layerId);
+        mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
+        currentFilter = mapInstance.getFilter(layerId);
 
-      if (currentStateName) {
-        const newFilter = [
-          '==',
-          ['get', 'ste_name'],
-          currentStateName,
-        ] as maplibregl.FilterSpecification;
-        mapInstance.setFilter(
-          layerId,
-          addFilterToSpec(currentFilter, newFilter),
-        );
-      }
-    });
+        if (currentStateName) {
+          const newFilter = [
+            '==',
+            ['get', 'ste_name'],
+            currentStateName,
+          ] as maplibregl.FilterSpecification;
+          mapInstance.setFilter(
+            layerId,
+            addFilterToSpec(currentFilter, newFilter),
+          );
+        }
+      });
   }, [mapInstance, selectedState, selectedCounty, isVisible]);
 
   const handleZoomOut = () => {

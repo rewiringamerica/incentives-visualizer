@@ -17,7 +17,7 @@ const Toggle: React.FC<ToggleProps> = ({ map, isVisible, onToggle }) => {
 
     const checkZoom = () => {
       const zoom = map.getZoom();
-      setShowToggle(zoom < 6); // only show toggle if zoomed out
+      setShowToggle(zoom <= 4.2); // only show toggle if zoomed out
     };
 
     map.on('zoom', checkZoom);

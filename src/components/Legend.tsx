@@ -101,7 +101,7 @@ class CustomLegendControl {
 
     // if at county zoom level, show different legend
     const zoom = this._map.getZoom();
-    const isCountyZoom = zoom >= 6;
+    const isCountyZoom = zoom > 5;
 
     // if on state view, show state labels
     // check if the map is toggled to incentive or coverage view

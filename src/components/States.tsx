@@ -188,7 +188,7 @@ function loadStates(
       source: 'statesData',
       filter: [
         'all',
-        ['in', 'ste_name', ...incentivesLow],
+        ['in', ['get', 'ste_name'], ['literal', incentivesLow]],
       ],
       paint: {
         'fill-color': '#6E33CF',
@@ -212,7 +212,7 @@ function loadStates(
       source: 'statesData',
       filter: [
         'all',
-        ['in', 'ste_name', ...incentivesMed],
+        ['in', ['get', 'ste_name'], ['literal', incentivesMed]],
       ],
       paint: {
         'fill-color': '#71C4CB',
@@ -236,7 +236,7 @@ function loadStates(
       source: 'statesData',
       filter: [
         'all',
-        ['in', 'ste_name', ...incentivesHi],
+        ['in', ['get', 'ste_name'], ['literal', incentivesHi]],
       ],
       paint: {
         'fill-color': '#F9D65B',
@@ -271,7 +271,7 @@ function loadStates(
     maxzoom: 6,
     filter: [
       'all',
-      ['in', 'ste_name', ...noCoverageStates],
+      ['in', ['get', 'ste_name'], ['literal', noCoverageStates]],
     ],
     paint: {
       'fill-color': '#8F8F8F',
