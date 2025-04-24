@@ -1,11 +1,10 @@
-import maplibregl from 'maplibre-gl';
 import { useEffect } from 'react';
 
 class CustomLegendControl {
   _map: maplibregl.Map | null = null;
   _container: HTMLDivElement | null = null;
 
-  onAdd(map: maplibregl.Map) {
+  initializeLegend(map: maplibregl.Map) {
     this._map = map;
     this._container = document.createElement('div');
     this._container.className = 'legend';
@@ -15,23 +14,23 @@ class CustomLegendControl {
     this._container.style.background = 'white';
     this._container.style.padding = '10px';
     this._container.style.marginBottom = '35px';
+
     this._container.style.borderRadius = '5px';
     this._container.style.boxShadow = '0px 0px 5px rgba(0,0,0,0.2)';
     this._container.innerHTML = '<strong>Legend</strong><br/>Loading...';
 
-    this.updateLegend();
-    return this._container;
-  }
+    // Stop event propagation for the legend container
+    this._container.addEventListener('mousedown', e => e.stopPropagation());
+    this._container.addEventListener('touchstart', e => e.stopPropagation());
+    this._container.addEventListener('click', e => e.stopPropagation());
 
-  onRemove() {
-    if (this._container?.parentNode) {
-      this._container.parentNode.removeChild(this._container);
-    }
-    this._map = null;
+    document.body.appendChild(this._container);
+    this.updateLegend();
   }
 
   updateLegend() {
-    if (!this._map || !this._container) {
+    if (!this._container) {
+      console.error('Legend container is not initialized.');
       return;
     }
 
@@ -106,6 +105,12 @@ class CustomLegendControl {
       </div>
     `;
   }
+
+  removeLegend() {
+    if (this._container?.parentNode) {
+      this._container.parentNode.removeChild(this._container);
+    }
+  }
 }
 
 interface LegendProps {
@@ -119,15 +124,17 @@ const Legend: React.FC<LegendProps> = ({ map }) => {
     }
 
     const legendControl = new CustomLegendControl();
-    map.addControl(legendControl, 'bottom-right');
+    legendControl.initializeLegend(map);
 
+    // Update legend when map style or data changes
     const update = () => legendControl.updateLegend();
     map.on('styledata', update);
     map.on('sourcedata', update);
 
     return () => {
       map.off('styledata', update);
-      map.removeControl(legendControl);
+      map.off('sourcedata', update);
+      legendControl.removeLegend();
     };
   }, [map]);
 
