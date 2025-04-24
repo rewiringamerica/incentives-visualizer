@@ -1,37 +1,51 @@
-import maplibregl from 'maplibre-gl';
 import { useEffect } from 'react';
 
 class CustomLegendControl {
   _map: maplibregl.Map | null = null;
   _container: HTMLDivElement | null = null;
+  _popup: HTMLDivElement | null = null;
 
-  onAdd(map: maplibregl.Map) {
+  initializeLegend(map: maplibregl.Map) {
     this._map = map;
     this._container = document.createElement('div');
-    this._container.className = 'legend';
-    this._container.style.position = 'absolute';
-    this._container.style.bottom = '10px';
-    this._container.style.right = '10px';
-    this._container.style.background = 'white';
-    this._container.style.padding = '10px';
-    this._container.style.marginBottom = '35px';
-    this._container.style.borderRadius = '5px';
-    this._container.style.boxShadow = '0px 0px 5px rgba(0,0,0,0.2)';
+    this._container.className =
+      'absolute bottom-16 right-2.5 bg-white p-2.5 rounded shadow-md z-50'; // Adjusted bottom position
     this._container.innerHTML = '<strong>Legend</strong><br/>Loading...';
+    document.body.appendChild(this._container);
+
+    // Popup for legend description
+    this._popup = document.createElement('div');
+    this._popup.className =
+      'hidden absolute bottom-full right-0 bg-white p-4 rounded shadow-md z-50 w-72 mb-5';
+    this._popup.setAttribute('aria-hidden', 'true');
+    this._popup.setAttribute('role', 'tooltip');
+    this._popup.setAttribute('id', 'legend-popup');
+    this._popup.innerHTML = `
+      <p class="font-bold">What do these keys mean?</p>
+      <p class="text-sm">Supported states have incentive data fully covered by Rewiring America's incentives API.
+      Coming Soon states have incentive data that has not been fully vetted yet.</p>
+    `;
+
+    this._container.appendChild(this._popup);
+    this._container.addEventListener('mouseenter', () => {
+      if (this._popup) {
+        this._popup.style.display = 'block';
+        this._popup.setAttribute('aria-hidden', 'false');
+        this._popup.setAttribute('aria-live', 'polite');
+      }
+    });
+    this._container.addEventListener('mouseleave', () => {
+      if (this._popup) {
+        this._popup.style.display = 'none';
+        this._popup.setAttribute('aria-hidden', 'true');
+      }
+    });
 
     this.updateLegend();
-    return this._container;
-  }
-
-  onRemove() {
-    if (this._container?.parentNode) {
-      this._container.parentNode.removeChild(this._container);
-    }
-    this._map = null;
   }
 
   updateLegend() {
-    if (!this._map || !this._container) {
+    if (!this._container || !this._map) {
       return;
     }
 
@@ -73,38 +87,51 @@ class CustomLegendControl {
     }
 
     this._container.innerHTML = `
-      <strong>Legend</strong>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 2vh;">
-        <span style="
-          width: 20px; height: 20px; 
-          background: ${fillColorCoverage}; 
-          opacity: ${fillOpacityCoverage};
-          border: 2px solid ${outlineColor || 'black'}; 
-          margin-right: 5px; display: inline-block;">
-        </span>
-        <span>Covered States</span>
-      </div>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 1vh;">
-        <span style="
-          width: 20px; height: 20px; 
-          background: ${fillColorBeta}; 
-          opacity: ${fillOpacityBeta};
-          border: 2px solid ${outlineColor || 'black'}; 
-          margin-right: 5px; display: inline-block;">
-        </span>
-        <span>Beta States</span>
-      </div>
-      <div style="display: flex; align-items: center; margin-top: 5px; width: 8vw; margin-bottom: 0.5vh;">
-        <span style="
-          width: 20px; height: 20px; 
-          background: ${fillColorNoCoverage}; 
-          opacity: ${fillOpacityNoCoverage};
-          border: 2px solid ${outlineColor || 'black'}; 
-          margin-right: 5px; display: inline-block;">
-        </span>
-        <span>Uncovered States</span>
-      </div>
+      <strong id="legend-title">Legend</strong>
+      <ul aria-labelledby="legend-title" style="list-style: none; padding: 0; margin: 0;">
+        <li style="display: flex; align-items: center; margin-top: 5px; margin-bottom: 2vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorCoverage}; 
+            opacity: ${fillOpacityCoverage};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;"
+            aria-hidden="true">
+          </span>
+          <span>Supported</span>
+        </li>
+        <li style="display: flex; align-items: center; margin-top: 5px; margin-bottom: 2vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorBeta}; 
+            opacity: ${fillOpacityBeta};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;"
+            aria-hidden="true">
+          </span>
+          <span>Coming Soon</span>
+        </li>
+        <li style="display: flex; align-items: center; margin-top: 5px; margin-bottom: 0.5vh;">
+          <span style="
+            width: 20px; height: 20px; 
+            background: ${fillColorNoCoverage}; 
+            opacity: ${fillOpacityNoCoverage};
+            border: 2px solid ${outlineColor || 'black'}; 
+            margin-right: 5px; display: inline-block;"
+            aria-hidden="true">
+          </span>
+          <span>Not Supported</span>
+        </li>
+      </ul>
     `;
+
+    this._container.appendChild(this._popup!);
+  }
+
+  removeLegend() {
+    if (this._container?.parentNode) {
+      this._container.parentNode.removeChild(this._container);
+    }
   }
 }
 
@@ -119,15 +146,17 @@ const Legend: React.FC<LegendProps> = ({ map }) => {
     }
 
     const legendControl = new CustomLegendControl();
-    map.addControl(legendControl, 'bottom-right');
+    legendControl.initializeLegend(map);
 
+    // Update legend when map style or data changes
     const update = () => legendControl.updateLegend();
     map.on('styledata', update);
     map.on('sourcedata', update);
 
     return () => {
       map.off('styledata', update);
-      map.removeControl(legendControl);
+      map.off('sourcedata', update);
+      legendControl.removeLegend();
     };
   }, [map]);
 
