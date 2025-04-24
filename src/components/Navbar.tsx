@@ -151,7 +151,11 @@ const Navbar: React.FC<NavbarProps> = ({
       </div>
       {/* Language dropdown */}
       <div className="absolute right-4 flex-shrink-0">
+        <label htmlFor="language-select" className="sr-only">
+          Select Language
+        </label>
         <select
+          id="language-select"
           className="bg-[#eed87e] h-8 rounded focus:outline-none border-0"
           defaultValue="EN"
         >

@@ -114,7 +114,11 @@ const Sidebar: React.FC<SidebarProps> = props => {
         </svg>
       </button>
 
-      <div className="pt-12 px-3 pb-4">
+      <div
+        className="pt-12 px-3 pb-4"
+        role="complementary"
+        aria-labelledby="sidebar-title"
+      >
         {name && (
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
