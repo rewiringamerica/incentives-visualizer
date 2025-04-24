@@ -8,8 +8,8 @@ Follow the instructions below to set up, install, and launch the application.
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- Yarn (v1.x or higher)
+- Node.js (latest LTS or v16+)
+- Yarn (v1.22+)
 
 ### Installation
 
@@ -22,10 +22,14 @@ Follow the instructions below to set up, install, and launch the application.
 
 2. Set up the environment:
 
-   - Create a `.env` file in the root directory and add your API keys and other environment variables as needed.
+   - Create a `.env` file in the root directory and add your API keys:
 
    ```bash
    MAPTILER_API_KEY=your_maptiler_api_key
+   API_URL=http://localhost:3000
+
+   # Production railway instance
+   API_URL=https://apirewiringamericaorg-production.up.railway.app/
    ```
 
 3. Install dependencies:
@@ -42,15 +46,37 @@ Follow the instructions below to set up, install, and launch the application.
 
 5. The application will be available at `http://localhost:1234` by default.
 
-## Existing Codebase
+## Development
 
-- `src/` - main source code directory
-  - `components/` - React components, including Map.tsx, etc.
-  - `lib/` - utility functions
+### Available Scripts
+
+- `yarn start` - Start the development server
+- `yarn build` - Build the application for production
+- `yarn generate-types` - Generate TypeScript types from the API spec
+- `yarn test` - Run Vitest tests
+- `yarn test:playwright` - Run Playwright end-to-end tests
+- `yarn format` - Check formatting with Prettier
+- `yarn lint` - Lint the code with ESLint
+
+## Project Structure
+
+- `src/` - Main source code directory
+  - `components/` - React components (Map, States, Counties, etc.)
+  - `data/` - Static data files and geojson resources
+  - `lib/` - Utility functions and API helpers
   - `styles/` - Tailwind CSS styles
-  - `types/` - types for API
-  - `index.html`
+  - `types/` - TypeScript type definitions
+  - `mocks/` - Mock data for development and testing
+  - `assets/` - Static assets like images and icons
+- `test/` - Test files
+  - `e2e/` - Playwright end-to-end tests
 
-Config files in the home directory include:
+## Technology Stack
 
-- `package.json`, `yarn.lock`, `.postcssrc.js`
+- React 19
+- TypeScript
+- Tailwind CSS
+- Parcel bundler
+- MapLibre GL for map rendering
+- Material UI components
+- Vitest and Playwright for testing
