@@ -7,30 +7,15 @@ class CustomLegendControl {
   initializeLegend(map: maplibregl.Map) {
     this._map = map;
     this._container = document.createElement('div');
-    this._container.className = 'legend';
-    this._container.style.position = 'absolute';
-    this._container.style.bottom = '10px';
-    this._container.style.right = '10px';
-    this._container.style.background = 'white';
-    this._container.style.padding = '10px';
-    this._container.style.marginBottom = '35px';
-
-    this._container.style.borderRadius = '5px';
-    this._container.style.boxShadow = '0px 0px 5px rgba(0,0,0,0.2)';
+    this._container.className =
+      'absolute bottom-2.5 right-2.5 bg-white p-2.5 rounded shadow-md z-50';
     this._container.innerHTML = '<strong>Legend</strong><br/>Loading...';
-
-    // Stop event propagation for the legend container
-    this._container.addEventListener('mousedown', e => e.stopPropagation());
-    this._container.addEventListener('touchstart', e => e.stopPropagation());
-    this._container.addEventListener('click', e => e.stopPropagation());
-
     document.body.appendChild(this._container);
     this.updateLegend();
   }
 
   updateLegend() {
-    if (!this._container) {
-      console.error('Legend container is not initialized.');
+    if (!this._container || !this._map) {
       return;
     }
 
