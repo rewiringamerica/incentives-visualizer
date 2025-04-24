@@ -268,7 +268,6 @@ function loadStates(
     id: 'states-no-coverage-layer',
     type: 'fill',
     source: 'statesData',
-    maxzoom: 6,
     filter: [
       'all',
       ['in', ['get', 'ste_name'], ['literal', noCoverageStates]],
