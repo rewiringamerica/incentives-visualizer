@@ -134,14 +134,17 @@ export const IncentiveCard: FC<{
   warningChip: string | null;
   buttonUrl: string | null;
 }> = ({ typeChips, headline, subHeadline, body, warningChip, buttonUrl }) => (
-  <Card padding="small">
+  <Card padding="small" role="region" aria-labelledby={`headline-${headline}`}>
     <div className="flex gap-4 justify-between items-baseline">
       <TruncatedTextWithTooltip
         text={headline}
         className="text-grey-900 text-lg font-medium leading-normal max-w-xs"
       />
       {buttonUrl && (
-        <BorderlessLinkButton href={buttonUrl}>
+        <BorderlessLinkButton
+          href={buttonUrl}
+          aria-label={`Learn more about ${headline}`}
+        >
           <ExternalLink w={20} h={20} />
         </BorderlessLinkButton>
       )}
@@ -157,7 +160,7 @@ export const IncentiveCard: FC<{
       className="text-grey-600 text-base leading-normal max-w-xs line-clamp-3"
     />
 
-    <div className="flex flex-wrap gap-2.5">
+    <div className="flex flex-wrap gap-2.5" aria-label="Incentive details">
       {typeChips.map((chip, index) => (
         <Chip key={index}>{chip}</Chip>
       ))}
@@ -165,7 +168,10 @@ export const IncentiveCard: FC<{
     </div>
 
     {buttonUrl && (
-      <BorderedLinkButton href={buttonUrl}>
+      <BorderedLinkButton
+        href={buttonUrl}
+        aria-label={`Learn more about ${headline}`}
+      >
         <UpRightArrow w={20} h={20} />
       </BorderedLinkButton>
     )}
