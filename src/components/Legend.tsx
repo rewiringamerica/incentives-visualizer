@@ -1,15 +1,21 @@
 import { useEffect } from 'react';
 
+interface LegendProps {
+  map: maplibregl.Map | null;
+  isVisible: boolean;
+}
+
 class CustomLegendControl {
   _map: maplibregl.Map | null = null;
   _container: HTMLDivElement | null = null;
+  _isVisible: boolean | null = null;
   _popup: HTMLDivElement | null = null;
 
   initializeLegend(map: maplibregl.Map) {
     this._map = map;
     this._container = document.createElement('div');
     this._container.className =
-      'absolute bottom-16 right-2.5 bg-white p-2.5 rounded shadow-md z-50'; // Adjusted bottom position
+      'absolute bottom-16 right-2.5 bg-white p-2.5 rounded shadow-md z-50';
     this._container.innerHTML = '<strong>Legend</strong><br/>Loading...';
     document.body.appendChild(this._container);
 
@@ -28,7 +34,7 @@ class CustomLegendControl {
 
     this._container.appendChild(this._popup);
     this._container.addEventListener('mouseenter', () => {
-      if (this._popup) {
+      if (this._popup && this._isVisible) {
         this._popup.style.display = 'block';
         this._popup.setAttribute('aria-hidden', 'false');
         this._popup.setAttribute('aria-live', 'polite');
@@ -42,6 +48,17 @@ class CustomLegendControl {
     });
 
     this.updateLegend();
+  }
+
+  setVisibleState(state: boolean) {
+    this._isVisible = state;
+    if (this._popup) {
+      if (!state) {
+        this._popup.style.display = state ? 'block' : 'none';
+        this._popup.setAttribute('aria-hidden', state ? 'false' : 'true');
+      }
+    }
+    this.updateLegend(); // Update when state changes
   }
 
   updateLegend() {
@@ -82,26 +99,68 @@ class CustomLegendControl {
       'fill-opacity',
     );
 
-    if (!fillColorCoverage) {
-      return;
+    // if at county zoom level, show different legend
+    const zoom = this._map.getZoom();
+    const isCountyZoom = zoom > 5;
+
+    // if on state view, show state labels
+    // check if the map is toggled to incentive or coverage view
+    let label1 = '';
+    let label2 = '';
+    let label3 = '';
+    let label4 = '';
+
+    // if on county view, show county labels
+    if (isCountyZoom) {
+      // numbers are arbitrary, can be changed later
+      label1 = '20+ Incentives';
+      label2 = '10-19 Incentives';
+      label3 = '1-9 Incentives';
+    } else if (this._isVisible) {
+      label1 = 'Supported';
+      label2 = 'Coming Soon';
+      label3 = 'Not Supported';
+    } else {
+      label1 = '60+ Incentives';
+      label2 = '21-60 Incentives';
+      label3 = 'No Incentives';
+      label4 = '0-20 Incentives';
+    }
+
+    let incentiveLow = '';
+
+    // if on incentive view, add extra label with color box for incentive-lo-layer
+    if (!this._isVisible && !isCountyZoom) {
+      incentiveLow = `
+        <div style="display: flex; align-items: center; margin-top: 5px; width: 120px; margin-bottom: 5px; font-size: 14px;">
+        <span style="
+          width: 20px; height: 20px; 
+          background: #6E33CF; 
+          opacity: ${fillOpacityCoverage};
+          border: 2px solid ${outlineColor || 'black'}; 
+          margin-right: 5px; display: inline-block;">
+        </span>
+        <span>${label4}</span>
+      </div>
+      `;
     }
 
     this._container.innerHTML = `
-      <strong id="legend-title">Legend</strong>
+      <strong style="font-size: 14px">Legend</strong>
       <ul aria-labelledby="legend-title" style="list-style: none; padding: 0; margin: 0;">
-        <li style="display: flex; align-items: center; margin-top: 5px; margin-bottom: 2vh;">
-          <span style="
-            width: 20px; height: 20px; 
-            background: ${fillColorCoverage}; 
-            opacity: ${fillOpacityCoverage};
-            border: 2px solid ${outlineColor || 'black'}; 
-            margin-right: 5px; display: inline-block;"
-            aria-hidden="true">
-          </span>
-          <span>Supported</span>
-        </li>
-        <li style="display: flex; align-items: center; margin-top: 5px; margin-bottom: 2vh;">
-          <span style="
+      <li style="display: flex; align-items: center; margin-top: 5px; width: 140px; margin-bottom: 5px; font-size: 14px;">
+        <span style="
+          width: 20px; height: 20px; 
+          background: ${fillColorCoverage}; 
+          opacity: ${fillOpacityCoverage};
+          border: 2px solid ${outlineColor || 'black'}; 
+          margin-right: 5px; display: inline-block;"
+          aria-hidden="true">
+        </span>
+        <span>${label1}</span>
+      </li>
+      <li style="display: flex; align-items: center; margin-top: 5px; width: 140px; margin-bottom: 5px; font-size: 14px;">
+        <span style="
             width: 20px; height: 20px; 
             background: ${fillColorBeta}; 
             opacity: ${fillOpacityBeta};
@@ -109,9 +168,10 @@ class CustomLegendControl {
             margin-right: 5px; display: inline-block;"
             aria-hidden="true">
           </span>
-          <span>Coming Soon</span>
+          <span>${label2}</span>
         </li>
-        <li style="display: flex; align-items: center; margin-top: 5px; margin-bottom: 0.5vh;">
+        ${incentiveLow}
+        <li style="display: flex; align-items: center; margin-top: 5px; width: 120px; font-size: 14px;">
           <span style="
             width: 20px; height: 20px; 
             background: ${fillColorNoCoverage}; 
@@ -120,10 +180,9 @@ class CustomLegendControl {
             margin-right: 5px; display: inline-block;"
             aria-hidden="true">
           </span>
-          <span>Not Supported</span>
-        </li>
-      </ul>
-    `;
+          <span>${label3}</span>
+        </div>
+        `;
 
     this._container.appendChild(this._popup!);
   }
@@ -135,11 +194,7 @@ class CustomLegendControl {
   }
 }
 
-interface LegendProps {
-  map: maplibregl.Map | null;
-}
-
-const Legend: React.FC<LegendProps> = ({ map }) => {
+const Legend: React.FC<LegendProps> = ({ map, isVisible }) => {
   useEffect(() => {
     if (!map) {
       return;
@@ -153,12 +208,16 @@ const Legend: React.FC<LegendProps> = ({ map }) => {
     map.on('styledata', update);
     map.on('sourcedata', update);
 
+    if (legendControl) {
+      legendControl.setVisibleState(isVisible);
+    }
+
     return () => {
       map.off('styledata', update);
       map.off('sourcedata', update);
       legendControl.removeLegend();
     };
-  }, [map]);
+  }, [isVisible, map]);
 
   return null;
 };

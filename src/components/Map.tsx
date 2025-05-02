@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import React, { useEffect, useRef, useState } from 'react';
@@ -6,7 +7,8 @@ import '../styles/index.css';
 import { loadCounties } from './Counties';
 import Legend from './Legend';
 import MapHighlights from './MapHighlights';
-import { loadStates, zoomToState } from './States';
+import { loadStates, updateStatesVisibility, zoomToState } from './States';
+import Toggle from './Toggle';
 import ZoomControls from './ZoomControls';
 
 interface MapProps {
@@ -16,6 +18,7 @@ interface MapProps {
   onMapSet: React.Dispatch<React.SetStateAction<maplibregl.Map | null>>;
   selectedState: maplibregl.MapGeoJSONFeature | null;
   selectedCounty: maplibregl.MapGeoJSONFeature | null;
+  isVisible: boolean;
 }
 
 const Map: React.FC<MapProps> = ({
@@ -27,8 +30,10 @@ const Map: React.FC<MapProps> = ({
   selectedCounty,
 }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const STYLE_VERSION = 8; // Required for declaring a style, may change in the future
   const [currentZoom, setCurrentZoom] = useState(4.2);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!mapContainer.current) {
@@ -61,7 +66,7 @@ const Map: React.FC<MapProps> = ({
     map.on('load', () => {
       // Load states and pass the onStateSelect callback so a state click will notify the parent.
       loadCounties(map, onCountySelect);
-      loadStates(map, onStateSelect);
+      loadStates(map, queryClient, onStateSelect);
       onMapSet(map);
     });
 
@@ -151,54 +156,64 @@ const Map: React.FC<MapProps> = ({
       return;
     }
 
+    updateStatesVisibility(mapInstance, isVisible);
+
     const currentStateName =
       selectedState?.properties?.ste_name ||
       selectedCounty?.properties?.ste_name;
 
     // Update state layers
-    [
-      'states-layer',
-      'states-coverage-layer',
-      'states-no-coverage-layer',
-      'states-beta-layer',
-      'state-labels-layer',
-    ].forEach(layerId => {
-      let currentFilter = mapInstance.getFilter(layerId);
-      mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
-      currentFilter = mapInstance.getFilter(layerId);
+    mapInstance
+      .getStyle()
+      .layers.filter(
+        layer =>
+          layer.id.startsWith('states-') || layer.id.startsWith('state-'),
+      )
+      .forEach(layer => {
+        const layerId = layer.id;
+        let currentFilter = mapInstance.getFilter(layerId);
+        mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
+        currentFilter = mapInstance.getFilter(layerId);
 
-      if (currentStateName) {
-        const newFilter = [
-          '!=',
-          ['get', 'ste_name'],
-          currentStateName,
-        ] as maplibregl.FilterSpecification;
-        mapInstance.setFilter(
-          layerId,
-          addFilterToSpec(currentFilter, newFilter),
-        );
-      }
-    });
+        if (currentStateName) {
+          const newFilter = [
+            '!=',
+            ['get', 'ste_name'],
+            currentStateName,
+          ] as maplibregl.FilterSpecification;
+          mapInstance.setFilter(
+            layerId,
+            addFilterToSpec(currentFilter, newFilter),
+          );
+        }
+      });
 
     // Update county layers
-    ['counties-layer', 'county-labels-layer'].forEach(layerId => {
-      let currentFilter = mapInstance.getFilter(layerId);
-      mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
-      currentFilter = mapInstance.getFilter(layerId);
+    mapInstance
+      .getStyle()
+      .layers.filter(
+        layer =>
+          layer.id.startsWith('counties-') || layer.id.startsWith('county-'),
+      )
+      .forEach(layer => {
+        const layerId = layer.id;
+        let currentFilter = mapInstance.getFilter(layerId);
+        mapInstance.setFilter(layerId, removeSelectionFilters(currentFilter));
+        currentFilter = mapInstance.getFilter(layerId);
 
-      if (currentStateName) {
-        const newFilter = [
-          '==',
-          ['get', 'ste_name'],
-          currentStateName,
-        ] as maplibregl.FilterSpecification;
-        mapInstance.setFilter(
-          layerId,
-          addFilterToSpec(currentFilter, newFilter),
-        );
-      }
-    });
-  }, [mapInstance, selectedState, selectedCounty]);
+        if (currentStateName) {
+          const newFilter = [
+            '==',
+            ['get', 'ste_name'],
+            currentStateName,
+          ] as maplibregl.FilterSpecification;
+          mapInstance.setFilter(
+            layerId,
+            addFilterToSpec(currentFilter, newFilter),
+          );
+        }
+      });
+  }, [mapInstance, selectedState, selectedCounty, isVisible]);
 
   const handleZoomOut = () => {
     if (!mapInstance) {
@@ -247,8 +262,9 @@ const Map: React.FC<MapProps> = ({
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
+      <Toggle map={mapInstance} isVisible={isVisible} onToggle={setIsVisible} />
       {currentZoom > 4.2 && <ZoomControls onZoomOut={handleZoomOut} />}
-      <Legend map={mapInstance} />
+      <Legend map={mapInstance} isVisible={isVisible} />
       <MapHighlights
         map={mapInstance}
         selectedState={selectedState}
